@@ -57,7 +57,7 @@ def gif(update: Update, context: CallbackContext) -> int:
     query.answer()
     query.edit_message_text(f"Selected option: {query.data}")
     #context.bot.send_animation(update.effective_chat.id, 'url')
-    context.bot.send_animation(update.effective_chat.id, animation=open("test\\gifs\\matrix-dodge.gif", 'rb')).animation
+    context.bot.send_animation(update.effective_chat.id, animation=open("ImageSources\\gifs\\matrix-dodge.gif", 'rb')).animation
 
 # process video (mp4) request
 def vid(update: Update, context: CallbackContext) -> int:
@@ -65,7 +65,7 @@ def vid(update: Update, context: CallbackContext) -> int:
     query = update.callback_query
     query.answer()
     query.edit_message_text(f"Selected option: {query.data}")
-    f = open("test\\mp4\\apored.mp4", 'rb')
+    f = open("ImageSources\\mp4\\apored.mp4", 'rb')
     context.bot.send_video(chat_id=update.effective_chat.id, supports_streaming=True, video=f)
     #context.bot.send_message(chat_id=update.effective_chat.id, text="Not supported yet")
 

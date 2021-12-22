@@ -17,11 +17,12 @@ def img2bitplane(img):
     b, g, r = cv2.split(img)
     # image with 8 bit integer
     bitdepth = 8
+
     # converting integer decimal values into 8 bit binary values
-    b_bits = np.unpackbits(np.array([b], dtype=np.uint8), axis = 1)
-    g_bits = np.unpackbits(np.array([g], dtype=np.uint8), axis = 1)
-    r_bits = np.unpackbits(np.array([r], dtype=np.uint8), axis = 1)
-    print(b_bits.shape)
+    # b_bits = np.unpackbits(np.array([b], dtype=np.uint8), axis = 1)
+    # g_bits = np.unpackbits(np.array([g], dtype=np.uint8), axis = 1)
+    # r_bits = np.unpackbits(np.array([r], dtype=np.uint8), axis = 1)
+    # print(b_bits.shape)
 
     # lists to store sliced bit planes
     b_out = []
