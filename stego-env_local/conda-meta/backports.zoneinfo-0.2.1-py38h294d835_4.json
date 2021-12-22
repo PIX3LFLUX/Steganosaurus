@@ -1,0 +1,219 @@
+{
+  "arch": "x86_64",
+  "build": "py38h294d835_4",
+  "build_number": 4,
+  "channel": "https://conda.anaconda.org/conda-forge/win-64",
+  "constrains": [],
+  "depends": [
+    "backports",
+    "python >=3.8,<3.9.0a0",
+    "python_abi 3.8.* *_cp38",
+    "tzdata",
+    "vc >=14.1,<15.0a0",
+    "vs2015_runtime >=14.16.27012"
+  ],
+  "extracted_package_dir": "C:\\Anaconda\\pkgs\\backports.zoneinfo-0.2.1-py38h294d835_4",
+  "features": "",
+  "files": [
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/INSTALLER",
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/LICENSE",
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/LICENSE_APACHE",
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/METADATA",
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/RECORD",
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/REQUESTED",
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/WHEEL",
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/direct_url.json",
+    "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/top_level.txt",
+    "Lib/site-packages/backports/zoneinfo/__init__.py",
+    "Lib/site-packages/backports/zoneinfo/__init__.pyi",
+    "Lib/site-packages/backports/zoneinfo/__pycache__/__init__.cpython-38.pyc",
+    "Lib/site-packages/backports/zoneinfo/__pycache__/_common.cpython-38.pyc",
+    "Lib/site-packages/backports/zoneinfo/__pycache__/_tzpath.cpython-38.pyc",
+    "Lib/site-packages/backports/zoneinfo/__pycache__/_version.cpython-38.pyc",
+    "Lib/site-packages/backports/zoneinfo/__pycache__/_zoneinfo.cpython-38.pyc",
+    "Lib/site-packages/backports/zoneinfo/_common.py",
+    "Lib/site-packages/backports/zoneinfo/_czoneinfo.cp38-win_amd64.pyd",
+    "Lib/site-packages/backports/zoneinfo/_tzpath.py",
+    "Lib/site-packages/backports/zoneinfo/_version.py",
+    "Lib/site-packages/backports/zoneinfo/_zoneinfo.py",
+    "Lib/site-packages/backports/zoneinfo/py.typed"
+  ],
+  "fn": "backports.zoneinfo-0.2.1-py38h294d835_4.tar.bz2",
+  "license": "Apache-2.0",
+  "license_family": "APACHE",
+  "link": {
+    "source": "C:\\Anaconda\\pkgs\\backports.zoneinfo-0.2.1-py38h294d835_4",
+    "type": 1
+  },
+  "md5": "1b88533cbe027f5e2081ca3facff8828",
+  "name": "backports.zoneinfo",
+  "package_tarball_full_path": "C:\\Anaconda\\pkgs\\backports.zoneinfo-0.2.1-py38h294d835_4.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/INSTALLER",
+        "path_type": "hardlink",
+        "sha256": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+        "sha256_in_prefix": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+        "size_in_bytes": 5
+      },
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/LICENSE",
+        "path_type": "hardlink",
+        "sha256": "33e8e5002d3512d3fcc2282b995e6bad9d334781b9c5ac31843f404900e1f3b4",
+        "sha256_in_prefix": "33e8e5002d3512d3fcc2282b995e6bad9d334781b9c5ac31843f404900e1f3b4",
+        "size_in_bytes": 592
+      },
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/LICENSE_APACHE",
+        "path_type": "hardlink",
+        "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "sha256_in_prefix": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "size_in_bytes": 11357
+      },
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/METADATA",
+        "path_type": "hardlink",
+        "sha256": "48bf3f0df93af1881dc2f7587907f5ad7dff37ba949c8fca471b986e982d9cad",
+        "sha256_in_prefix": "48bf3f0df93af1881dc2f7587907f5ad7dff37ba949c8fca471b986e982d9cad",
+        "size_in_bytes": 4781
+      },
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/RECORD",
+        "path_type": "hardlink",
+        "sha256": "554da7c11bf3e3ba6dd8d3f222f609d3bfaf653c8b7018d6fc09130e0ed4da8e",
+        "sha256_in_prefix": "554da7c11bf3e3ba6dd8d3f222f609d3bfaf653c8b7018d6fc09130e0ed4da8e",
+        "size_in_bytes": 1990
+      },
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/REQUESTED",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      },
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/WHEEL",
+        "path_type": "hardlink",
+        "sha256": "3f6e2144341aa5c900bc7be0041ce51f9bb0eab43fa1942d29b1ba76b1aba8e3",
+        "sha256_in_prefix": "3f6e2144341aa5c900bc7be0041ce51f9bb0eab43fa1942d29b1ba76b1aba8e3",
+        "size_in_bytes": 100
+      },
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/direct_url.json",
+        "path_type": "hardlink",
+        "sha256": "c86bdc8ccd91c417d1e44830882c79d456a9a39cf13ca87abe8ea5a9181a3cac",
+        "sha256_in_prefix": "c86bdc8ccd91c417d1e44830882c79d456a9a39cf13ca87abe8ea5a9181a3cac",
+        "size_in_bytes": 79
+      },
+      {
+        "_path": "Lib/site-packages/backports.zoneinfo-0.2.1.dist-info/top_level.txt",
+        "path_type": "hardlink",
+        "sha256": "7068da2cc3a8051d452b4029a23b73595995893b49ec91882bf1f05e212cbed5",
+        "sha256_in_prefix": "7068da2cc3a8051d452b4029a23b73595995893b49ec91882bf1f05e212cbed5",
+        "size_in_bytes": 10
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "6ad094fdf320910204f830a34893a2b2df4602a6964001a1ac30396c25cf4315",
+        "sha256_in_prefix": "6ad094fdf320910204f830a34893a2b2df4602a6964001a1ac30396c25cf4315",
+        "size_in_bytes": 1235
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/__init__.pyi",
+        "path_type": "hardlink",
+        "sha256": "d7f4fb741d7e161d6cedfdb335ad50acff693bf6811de99e68888904f433dc5b",
+        "sha256_in_prefix": "d7f4fb741d7e161d6cedfdb335ad50acff693bf6811de99e68888904f433dc5b",
+        "size_in_bytes": 1234
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/__pycache__/__init__.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "7fd4ed9453b9a741816221ce7f1828b7872e058804dc31d7b330a27147b6b1f7",
+        "sha256_in_prefix": "7fd4ed9453b9a741816221ce7f1828b7872e058804dc31d7b330a27147b6b1f7",
+        "size_in_bytes": 1136
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/__pycache__/_common.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "64d165d999dbbce2f33d20c66672d0fdb3ecddc2183064268bc08d0c678b8524",
+        "sha256_in_prefix": "64d165d999dbbce2f33d20c66672d0fdb3ecddc2183064268bc08d0c678b8524",
+        "size_in_bytes": 3233
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/__pycache__/_tzpath.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "6e3402fa4ad53dd2741bfc23d225121ae3c61b297b633fe7337ad867687d319b",
+        "sha256_in_prefix": "6e3402fa4ad53dd2741bfc23d225121ae3c61b297b633fe7337ad867687d319b",
+        "size_in_bytes": 4416
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/__pycache__/_version.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "3fbbb3862a4d68e41bd3c5c82e1d39be4290a669324abad9e04981e89f4d7cd2",
+        "sha256_in_prefix": "3fbbb3862a4d68e41bd3c5c82e1d39be4290a669324abad9e04981e89f4d7cd2",
+        "size_in_bytes": 160
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/__pycache__/_zoneinfo.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "f93f62141d5f0dedf610c99f44d602f4186cbac3ca24dd5b84a69cda17ae7ade",
+        "sha256_in_prefix": "f93f62141d5f0dedf610c99f44d602f4186cbac3ca24dd5b84a69cda17ae7ade",
+        "size_in_bytes": 15532
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/_common.py",
+        "path_type": "hardlink",
+        "sha256": "80ab98fd5f9829b69a6d3e55470d4c5982717ee8830cb0a0ed4a25618238dabc",
+        "sha256_in_prefix": "80ab98fd5f9829b69a6d3e55470d4c5982717ee8830cb0a0ed4a25618238dabc",
+        "size_in_bytes": 5469
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/_czoneinfo.cp38-win_amd64.pyd",
+        "path_type": "hardlink",
+        "sha256": "fde940d37759f350c07196e8052ab8fae180226828c02625466e69b538f586ab",
+        "sha256_in_prefix": "fde940d37759f350c07196e8052ab8fae180226828c02625466e69b538f586ab",
+        "size_in_bytes": 34816
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/_tzpath.py",
+        "path_type": "hardlink",
+        "sha256": "f8b1a9a69a76b4112736f3d2fbd8889cdfd0df4d868d196aa2146aa9c282d3a9",
+        "sha256_in_prefix": "f8b1a9a69a76b4112736f3d2fbd8889cdfd0df4d868d196aa2146aa9c282d3a9",
+        "size_in_bytes": 5611
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/_version.py",
+        "path_type": "hardlink",
+        "sha256": "1df8d53aba539e667ec551426125665f9d045da050789b5e5071be3c3ea242cf",
+        "sha256_in_prefix": "1df8d53aba539e667ec551426125665f9d045da050789b5e5071be3c3ea242cf",
+        "size_in_bytes": 22
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/_zoneinfo.py",
+        "path_type": "hardlink",
+        "sha256": "0755b72a53de5078e4d6aa41c9b187a2b3ccbdf70bc0617b76d623f88140c58e",
+        "sha256_in_prefix": "0755b72a53de5078e4d6aa41c9b187a2b3ccbdf70bc0617b76d623f88140c58e",
+        "size_in_bytes": 24353
+      },
+      {
+        "_path": "Lib/site-packages/backports/zoneinfo/py.typed",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      }
+    ],
+    "paths_version": 1
+  },
+  "platform": "win32",
+  "requested_spec": "conda-forge/win-64::backports.zoneinfo==0.2.1=py38h294d835_4",
+  "sha256": "55bd5160667bc82260580c0e996befacc97b6fffbe2172e951cc3c6cd4caba00",
+  "size": 51409,
+  "subdir": "win-64",
+  "timestamp": 1629670178940,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/win-64/backports.zoneinfo-0.2.1-py38h294d835_4.tar.bz2",
+  "version": "0.2.1"
+}

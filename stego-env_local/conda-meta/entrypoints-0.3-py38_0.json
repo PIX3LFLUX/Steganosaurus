@@ -1,0 +1,62 @@
+{
+  "build": "py38_0",
+  "build_number": 0,
+  "channel": "https://repo.anaconda.com/pkgs/main/win-64",
+  "constrains": [],
+  "depends": [
+    "python >=3.8,<3.9.0a0"
+  ],
+  "extracted_package_dir": "C:\\Anaconda\\pkgs\\entrypoints-0.3-py38_0",
+  "features": "",
+  "files": [
+    "Lib/site-packages/__pycache__/entrypoints.cpython-38.pyc",
+    "Lib/site-packages/entrypoints-0.3-py3.8.egg-info",
+    "Lib/site-packages/entrypoints.py"
+  ],
+  "fn": "entrypoints-0.3-py38_0.conda",
+  "legacy_bz2_md5": "af53845404a121c5aa292997313cb95a",
+  "legacy_bz2_size": 10491,
+  "license": "MIT License",
+  "license_family": "MIT",
+  "link": {
+    "source": "C:\\Anaconda\\pkgs\\entrypoints-0.3-py38_0",
+    "type": 1
+  },
+  "md5": "bc974bce6d4626ff8baecb1f1db8a25a",
+  "name": "entrypoints",
+  "package_tarball_full_path": "C:\\Anaconda\\pkgs\\entrypoints-0.3-py38_0.conda",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "Lib/site-packages/__pycache__/entrypoints.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "4e79290663ce0a89f56042c75758754e0c0ab2f9ff55164a71103e672d8c1039",
+        "sha256_in_prefix": "4e79290663ce0a89f56042c75758754e0c0ab2f9ff55164a71103e672d8c1039",
+        "size_in_bytes": 7140
+      },
+      {
+        "_path": "Lib/site-packages/entrypoints-0.3-py3.8.egg-info",
+        "path_type": "hardlink",
+        "sha256": "256aa4d2dfb6ac3a7e4051bed2a740cc322918c5fd0da760abc909e83718fb67",
+        "sha256_in_prefix": "256aa4d2dfb6ac3a7e4051bed2a740cc322918c5fd0da760abc909e83718fb67",
+        "size_in_bytes": 294
+      },
+      {
+        "_path": "Lib/site-packages/entrypoints.py",
+        "path_type": "hardlink",
+        "sha256": "68a5307fc9444bce2f15b1bf04a97bd233c20ffdd7d8277205e5e546503be1f0",
+        "sha256_in_prefix": "68a5307fc9444bce2f15b1bf04a97bd233c20ffdd7d8277205e5e546503be1f0",
+        "size_in_bytes": 8262
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "defaults/win-64::entrypoints==0.3=py38_0",
+  "sha256": "b54973897a447815794d1fe59cdc14ac9d351f244f1e0cc0d5e89c7e648102e1",
+  "size": 10770,
+  "subdir": "win-64",
+  "timestamp": 1572515039903,
+  "track_features": "",
+  "url": "https://repo.anaconda.com/pkgs/main/win-64/entrypoints-0.3-py38_0.conda",
+  "version": "0.3"
+}

@@ -1,0 +1,14 @@
+prefix=C:/Users/maxik/Documents/Semester_6/Projektarbeit/github_repo/Steganography/stego-env_local/Library
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: hdf5
+Description: HDF5 (Hierarchical Data Format 5) Software Library
+Version: 1.10.4
+
+Cflags: -I${includedir}
+Libs: -L${libdir}  -lhdf5
+Requires: 
+Libs.private:  -lC:/Users/maxik/Documents/Semester_6/Projektarbeit/github_repo/Steganography/stego-env_local/Library/lib/z.lib  -lhdf5
+Requires.private: 
