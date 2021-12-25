@@ -3,7 +3,7 @@
 This is a project from the University of applied sciences in Karlsruhe, licensed under the GNU license.
 
 The goal of this project is to send text messages hidden inside images using the Discrete Fourier Transform (or rather FFT).
-The benefits over 'converntional' LSB modification are that the hidden information is much harder for the human eye to see, since it was hidden in the frequency domain, which corresponds to subtle changes of color in high frequency parts of the stego image. It is also spread much more, which makes it even harder to detect with the naked eye.
+The benefit over 'conventional' LSB modification is that the hidden information is much harder for the human eye to see, since it was hidden in the frequency domain, which corresponds to subtle changes of color in high frequency parts of the stego image. It is also spread much more, which makes it even harder to detect with the naked eye.
 
 But this also comes at a cost:
 The payload cannot be as big as that of simple LSB embedding in the spatial domain.
