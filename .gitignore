@@ -1,3 +1,7 @@
 ImageSources/Steganograms/remerged_sharp
 ImageSources/Steganograms/remerged_sharp.png
 ImageSources/Steganograms/remerged_sharp.png
+stego-env_local
+.vscode
+__pycache__
+ImageSources/Steganograms/remerged_sharp.png

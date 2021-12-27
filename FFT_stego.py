@@ -14,17 +14,31 @@ def text_from_bits(bits, encoding='utf-8', errors='surrogatepass'):
 def text_to_bits_int(text, gain):
     string_bits = text_to_bits(text)
     # convert each char to int
-    return [int(i)*gain for i in string_bits]
+    message_bits = [int(i)*gain for i in string_bits]
+    # get length of bitstream as bytes (overflow error if too large)
+    formated = bin(len(message_bits))[2:]
+    while len(formated) < 16:
+        formated = '0' + formated
+    message_len = [int(j)*gain for j in formated]
+    # append length onto the first 2 bytes of the message
+    message_bits = message_len + message_bits
+    return message_bits
+
 
 def text_from_bits_int(bits):
     # convert each element to string
-    string_bits = [str(i) for i in bits]
+    message_len_bits = bits[:16]
+    message_len = ""
+    for bit in message_len_bits:
+        message_len = message_len + str(bit)
+    message_len = int(message_len, 2)
+    string_bits = [str(i) for i in bits[16:message_len+16]]
     string_concat = ""
     # concatenate each element to one string
     for string in string_bits:
         string_concat += string
     string_decode = text_from_bits(string_concat)
-    return string_decode
+    return string_decode, message_len
 
 
 # normalize a channel by its max and min values
@@ -50,8 +64,8 @@ def message2bin(message, threshold):
 
 
 def create_FFTmask(xlen, ylen, message):
-    # calculate minimum part to be cut and add another 1% because of rounding errors and for "safety"
-    cut = np.sqrt(2*len(message)/(ylen*xlen))*1.01
+    # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
+    cut = np.sqrt(2*len(message)/(ylen*xlen))*1.03
 
     #cut off high frequencies from R channel
     mask = np.full((ylen, xlen), True)
@@ -70,6 +84,7 @@ def embedBin2FFT(cover_channel, mask, message):
     ylength, xlength = fft_abs.shape
     
     # write hidden message into filtered absolute part
+    message_len = len(message)
     counter=0
     for i in range(ylength):
         # if cover_rows == 50:
@@ -77,11 +92,12 @@ def embedBin2FFT(cover_channel, mask, message):
         for j in range(xlength):
             # write where coefficients are zero -> previously filtered out.
             if mask[i,j]==0:
-                if counter<len(message):
-                    # write hidden message inside absolute part by overwriting coefficients where the mask is 0
-                    fft_abs[i,j]=message[counter]
-                    # print(cover_r_fft_abs[i,j])
-                    counter+=1
+                if counter==message_len:
+                    break
+                # write hidden message inside absolute part by overwriting coefficients where the mask is 0
+                fft_abs[i,j]=message[counter]
+                # print(cover_r_fft_abs[i,j])
+                counter+=1
 
     # # mirror reverse loop
     # counter = 0
@@ -109,18 +125,15 @@ def calculate_FFTmask(xlength, ylength, cut):
     return stego_fft_mask
 
 
-def get_message(stego_channel, mask, message_length):
+def get_message(stego_channel, mask):
     # transform R channel into frequency domain
     stego_r_fft =np.fft.fft2(stego_channel)
     stego_r_fft_abs = np.abs(stego_r_fft)
     ylen, xlen = stego_r_fft_abs.shape
 
     # calculate message length from mask
-    # mask_tmp = mask[mask != True]
-    # print(mask_tmp.shape)
-    # message_len = np.multiply(*mask_tmp.shape)/2
-    # print("message length: ", message_len)
-    # create message buffer
+    message_length = int(np.count_nonzero(mask == False)//2)
+
     message=np.zeros(message_length, dtype='uint32')
     counter=0
     for i in range(ylen):
