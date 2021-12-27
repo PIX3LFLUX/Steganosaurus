@@ -148,9 +148,12 @@ def get_message(stego_channel, mask):
     return message
 
 
-def steg_encode(image, string, gain):
+def steg_encode(cover_img_path, stego_img_path, string, gain):
      # convert utf-8 to binary with 2 bytes prepended for telling length of message
     bin_encoded =  text_to_bits_int(string, gain)
+
+    image = Image.open(cover_img_path)
+    # image.load()
 
     Rot, Grün, Blau= image.split() #split image into its RGB channels
 
@@ -171,6 +174,26 @@ def steg_encode(image, string, gain):
     # create steganogram
     stego_img = Image.fromarray(stego)
 
-    stego_img.save("ImageSources\\Steganograms\\remerged_sharp.png")     #save image as png
+    stego_img.save(stego_img_path)     #save image as png
 
     return cut
+
+
+def steg_decode(stego_img_path, cut):
+    stego_img = Image.open(stego_img_path)
+
+    stego_r, stego_g, stego_b = stego_img.split() #split image into its RGB channels
+
+    stego_fft_mask = calculate_FFTmask(*(stego_img.size), cut)
+
+    message = get_message(stego_r, stego_fft_mask)
+
+    # calculate threshold
+    threshold = np.max(message)/2
+
+    # convert message values to binary
+    binary = message2bin(message, threshold)
+
+    text, _ = text_from_bits_int(binary)
+
+    return text
