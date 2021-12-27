@@ -1,5 +1,6 @@
 """ string version """
 import numpy as np
+from PIL import Image
 
 def text_to_bits(text, encoding='utf-8', errors='surrogatepass'):
     bits = bin(int.from_bytes(text.encode(encoding, errors), 'big'))[2:]
@@ -145,3 +146,31 @@ def get_message(stego_channel, mask):
                 counter+=1 
 
     return message
+
+
+def steg_encode(image, string, gain):
+     # convert utf-8 to binary with 2 bytes prepended for telling length of message
+    bin_encoded =  text_to_bits_int(string, gain)
+
+    Rot, Grün, Blau= image.split() #split image into its RGB channels
+
+    # create rectangular fft mask
+    cover_r_fft_mask, cut = create_FFTmask(*(image.size), bin_encoded)
+
+    # cover_r_fft_masked = np.abs(np.fft.fft2(Rot))*cover_r_fft_mask
+
+    # calculate channel with embedded binary data in frequency domain and reverse fft
+    cover_r_masked = embedBin2FFT(Rot, cover_r_fft_mask, bin_encoded)
+
+    # normalize output
+    cover_r_masked_norm = convert(cover_r_masked, 0,255, np.uint8)
+
+    # merge layers
+    stego =  np.stack((cover_r_masked_norm, Grün, Blau), axis=2).astype('uint8')
+
+    # create steganogram
+    stego_img = Image.fromarray(stego)
+
+    stego_img.save("ImageSources\\Steganograms\\remerged_sharp.png")     #save image as png
+
+    return cut
