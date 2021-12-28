@@ -68,6 +68,8 @@ def create_FFTmask(columns, rows, message):
     # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
     cut = np.sqrt(2*len(message)/(rows*columns))*1.03
 
+    if cut > 0.7:
+        raise Exception("The message is too large. Major distortions are to be expected.")
     #cut off high frequencies from R channel
     mask = np.full((rows, columns), True)
     row_start = round(rows/2*(1-cut))
