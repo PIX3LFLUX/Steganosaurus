@@ -11,8 +11,9 @@ def text_from_bits(bits, encoding='utf-8', errors='surrogatepass'):
     return n.to_bytes((n.bit_length() + 7) // 8, 'big').decode(encoding, errors) or '\0'
 
     
-""" int version """
-def text_to_bits_int(text, gain):
+# convert a utf-8 string to its digital counterpart.
+# prepend 2 bytes of message length to the returned digital message
+def text_to_bits_int(text: str, gain: float) -> list:
     string_bits = text_to_bits(text)
     # convert each char to int
     message_bits = [int(i)*gain for i in string_bits]
@@ -26,7 +27,8 @@ def text_to_bits_int(text, gain):
     return message_bits
 
 
-def text_from_bits_int(bits):
+# convert an array of 1s and 0s to a utf-8 string
+def text_from_bits_int(bits: list):
     # convert each element to string
     message_len_bits = bits[:16]
     message_len = ""
@@ -54,19 +56,20 @@ def convert(img, target_type_min, target_type_max, target_type):
 
 
 # convert inverse transformed message to parsable binary message
-def message2bin(message, threshold):
-    digital = np.zeros(len(message)).astype('uint8')
-    for ix, m in enumerate(message):
-        if m > threshold:
+def message2bin(message_analog, threshold) -> list:
+    message_len = len(message_analog)
+    digital = np.zeros(message_len).astype('uint8')
+    for ix in range(message_len):
+        if message_analog[ix] > threshold:
             digital[ix] = 1
         else:
             digital[ix] = 0
     return digital
 
 
-def create_FFTmask(columns, rows, message, optcut = None):
+def create_FFTmask(columns, rows, message_digital, optcut = None) -> tuple:
     # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
-    cut = np.sqrt(2*len(message)/(rows*columns))*1.03
+    cut = np.sqrt(2*len(message_digital)/(rows*columns))*1.03
     if cut > 0.7:
         raise Exception("The message is too large. Major distortions are to be expected.")
     if not optcut:
@@ -85,13 +88,13 @@ def create_FFTmask(columns, rows, message, optcut = None):
 
     return mask, cut
 
-def embedBin2FFT(cover_channel, mask, message):
+def embedBin2FFT(cover_channel, mask, message_digital):
     fft = np.fft.fft2(cover_channel)
     fft_abs = np.abs(fft)
     rows, cols = fft_abs.shape
     
-    # write hidden message into filtered absolute part
-    message_len = len(message)
+    # cache message length
+    message_len = len(message_digital)
     counter=0
     for i in range(rows):
         # if cover_rows == 50:
@@ -102,7 +105,7 @@ def embedBin2FFT(cover_channel, mask, message):
                 if counter==message_len:
                     break
                 # write hidden message inside absolute part by overwriting coefficients where the mask is 0
-                fft_abs[i,j]=message[counter]
+                fft_abs[i,j]=message_digital[counter]
                 # print(cover_r_fft_abs[i,j])
                 counter+=1
 
@@ -115,13 +118,13 @@ def embedBin2FFT(cover_channel, mask, message):
     #                 cover_r_fft_abs[i,j]=bin_encoded[counter]
     #                 counter+=1
 
-    #IFFT on R channel. Take filtered absolute and inverse with original phase, imaginary part should be negligable
-    cover_r_masked = np.fft.ifft2(fft_abs*np.exp(1j*np.angle(fft))).real
+    #IFFT on single channel. Take filtered absolute and inverse with original phase, imaginary part should be negligable
+    cover_masked = np.fft.ifft2(fft_abs*np.exp(1j*np.angle(fft))).real
     # print(cover_r_masked)
-    return cover_r_masked
+    return cover_masked
 
 
-# calculate mask, default cut = 0.4
+# calculate and return mask, default cut = 0.4
 def calculate_FFTmask(columns, rows, cut = None):
     if not cut:
         cut = 0.4
@@ -135,7 +138,8 @@ def calculate_FFTmask(columns, rows, cut = None):
     return stego_fft_mask
 
 
-def get_message(stego_channel, mask):
+# returns a list with analog values (int)
+def get_message(stego_channel, mask) -> list:
     # transform R channel into frequency domain
     stego_r_fft =np.fft.fft2(stego_channel)
     stego_r_fft_abs = np.abs(stego_r_fft)
@@ -144,22 +148,23 @@ def get_message(stego_channel, mask):
     # calculate message length from mask
     message_length = int(np.count_nonzero(mask == False)//2)
 
-    message=np.zeros(message_length, dtype='uint32')
+    message_analog=np.zeros(message_length, dtype='uint32')
     counter=0
     for i in range(rows):
         for j in range(cols):
             if mask[i,j]==0:
                 if counter==message_length:
                     break
-                message[counter] = stego_r_fft_abs[i,j]
+                message_analog[counter] = stego_r_fft_abs[i,j]
                 counter+=1 
 
-    return message
+    return message_analog
 
 # ------------------------------------------------------------------------------------------------------------
 cover_img_path = ""
 stego_img_path = ""
 optcut = None
+message = ""
 
 def set_img_path(cover_path, stego_path):
     global cover_img_path
@@ -172,23 +177,29 @@ def get_img_path():
     global stego_img_path
     return cover_img_path, stego_img_path
 
-def enable_optcut():
+# enable optimal cut
+def set_optcut(enable: bool):
     global optcut
-    optcut = True
+    if enable:
+        optcut = True
+    else:
+        optcut = None
 
-def disable_optcut():
-    global optcut
-    optcut = None
+# pass message string
+def set_message(string):
+    global message
+    message = string
 
 # encodes string into abs fft of the image previously declared with set_img_path().
 # encoding happens with a specific gain and cut value
 # the default cut value is 0.4, but an option for optcut can be passed and an optimal cut value will be calculated, which has to be passed to the receiver later on.
-def steg_encode(string, gain):
+def steg_encode(gain: int) -> float:
     global cover_img_path
     global stego_img_path
     global optcut
+    global message
      # convert utf-8 to binary with 2 bytes prepended for telling length of message
-    bin_encoded =  text_to_bits_int(string, gain)
+    bin_encoded =  text_to_bits_int(message, gain)
 
     image = Image.open(cover_img_path)
     # image.load()
@@ -218,7 +229,7 @@ def steg_encode(string, gain):
 
 # decodes the message from the abs fft of the previously passed image (stego). if the steganogram was created with a specific cut value,
 # this can also be passed. default is cut=0.4
-def steg_decode(cut = None):
+def steg_decode(cut: float=None) -> str:
     global stego_img_path
     stego_img = Image.open(stego_img_path)
 
@@ -226,13 +237,13 @@ def steg_decode(cut = None):
 
     stego_fft_mask = calculate_FFTmask(*(stego_img.size), cut)
 
-    message = get_message(stego_r, stego_fft_mask)
+    message_analog = get_message(stego_r, stego_fft_mask)
 
     # calculate threshold
-    threshold = np.max(message)/2
+    threshold = np.max(message_analog)/2
 
     # convert message values to binary
-    binary = message2bin(message, threshold)
+    binary = message2bin(message_analog, threshold)
 
     text, _ = text_from_bits_int(binary)
 
@@ -240,8 +251,8 @@ def steg_decode(cut = None):
 
 
 # goes through the whole encoding and decoding process once. returns text and cut value
-def search(string ,gain):
-    cut = steg_encode(string, gain)
+def search(gain: float) -> tuple:
+    cut = steg_encode(gain)
     # ---------------------------------------------------------------------------------------------------------------------
     # ---------------------------------------------TRANSMISSION------------------------------------------------------------
     # ---------------------------------------------------------------------------------------------------------------------
@@ -252,16 +263,17 @@ def search(string ,gain):
 
 
 # doubles gain until one encoding and decoding process succeeds. returns gain and previous gain
-def gain_booster(string, gain=10000):
+def gain_booster(gain: int=1000) -> tuple:
+    global message
     prev_gain = 0
 
     # reset text
     Text = ""
-    while Text != string:
+    while Text != message:
         try:
-            Text, cut = search(string, gain)
+            Text, cut = search(gain)
             print("gain\t", gain, "\ttext\t", Text[:10])    
-            if Text != string:
+            if Text != message:
                 prev_gain = gain
                 Text = ""
                 gain *= 2
@@ -278,36 +290,39 @@ def gain_booster(string, gain=10000):
 recursive_cnt = 0
 success_gain = 0
 # find the best gain with recursion. returns only successful gain
-def binary_search(string, low, high, num_recur=5):
+def binary_search(low, high, num_recur: int=5) -> float:
     global recursive_cnt
     global success_gain
     global success_text
+    global message
     recursive_cnt += 1
     
     if high >= low:
         gain = low + (high - low)//2
 
         try:
-            Text, _ = search(string, gain)
+            Text, _ = search(gain)
         except UnicodeDecodeError:
+            Text = ""
+        except ValueError:
             Text = ""
         print("iteration:", recursive_cnt, "\tgain\t", gain, "\tparsed text:\n", Text[:10])
 
         if recursive_cnt == num_recur:
             recursive_cnt = 0
-            if Text == string:
+            if Text == message:
                 return gain
             else:
                 return success_gain
 
-        if Text == string:
+        if Text == message:
             # save last successful gain
             success_gain = gain
             # Search the left half
-            return binary_search(string, low, gain-1)
+            return binary_search(low, gain-1)
             # Search the right half
         else:
-            return binary_search(string, gain + 1, high)
+            return binary_search(gain + 1, high)
 
     else:
         return -1
