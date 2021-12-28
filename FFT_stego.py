@@ -64,12 +64,17 @@ def message2bin(message, threshold):
     return digital
 
 
-def create_FFTmask(columns, rows, message):
+def create_FFTmask(columns, rows, message, optcut = None):
     # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
     cut = np.sqrt(2*len(message)/(rows*columns))*1.03
-
     if cut > 0.7:
         raise Exception("The message is too large. Major distortions are to be expected.")
+    if not optcut:
+        if cut > 0.4:
+            raise Exception("The message is too large. Major distortions are to be expected.")
+        else:
+            cut = 0.4
+
     #cut off high frequencies from R channel
     mask = np.full((rows, columns), True)
     row_start = round(rows/2*(1-cut))
@@ -79,7 +84,6 @@ def create_FFTmask(columns, rows, message):
     mask[row_start:row_stop, col_start:col_stop] = False  # rectangular
 
     return mask, cut
-
 
 def embedBin2FFT(cover_channel, mask, message):
     fft = np.fft.fft2(cover_channel)
@@ -117,7 +121,10 @@ def embedBin2FFT(cover_channel, mask, message):
     return cover_r_masked
 
 
-def calculate_FFTmask(columns, rows, cut):
+# calculate mask, default cut = 0.4
+def calculate_FFTmask(columns, rows, cut = None):
+    if not cut:
+        cut = 0.4
     stego_fft_mask = np.full((rows, columns), True)
     row_start = round(rows/2*(1-cut))
     row_stop = round(rows/2*(1+cut))
@@ -149,8 +156,37 @@ def get_message(stego_channel, mask):
 
     return message
 
+# ------------------------------------------------------------------------------------------------------------
+cover_img_path = ""
+stego_img_path = ""
+optcut = None
 
-def steg_encode(cover_img_path, stego_img_path, string, gain):
+def set_img_path(cover_path, stego_path):
+    global cover_img_path
+    global stego_img_path
+    cover_img_path = cover_path
+    stego_img_path = stego_path
+
+def get_img_path():
+    global cover_img_path
+    global stego_img_path
+    return cover_img_path, stego_img_path
+
+def enable_optcut():
+    global optcut
+    optcut = True
+
+def disable_optcut():
+    global optcut
+    optcut = None
+
+# encodes string into abs fft of the image previously declared with set_img_path().
+# encoding happens with a specific gain and cut value
+# the default cut value is 0.4, but an option for optcut can be passed and an optimal cut value will be calculated, which has to be passed to the receiver later on.
+def steg_encode(string, gain):
+    global cover_img_path
+    global stego_img_path
+    global optcut
      # convert utf-8 to binary with 2 bytes prepended for telling length of message
     bin_encoded =  text_to_bits_int(string, gain)
 
@@ -160,7 +196,7 @@ def steg_encode(cover_img_path, stego_img_path, string, gain):
     Rot, Grün, Blau= image.split() #split image into its RGB channels
 
     # create rectangular fft mask
-    cover_r_fft_mask, cut = create_FFTmask(*(image.size), bin_encoded)
+    cover_r_fft_mask, cut = create_FFTmask(*(image.size), bin_encoded, optcut)
 
     # cover_r_fft_masked = np.abs(np.fft.fft2(Rot))*cover_r_fft_mask
 
@@ -180,8 +216,10 @@ def steg_encode(cover_img_path, stego_img_path, string, gain):
 
     return cut
 
-
-def steg_decode(stego_img_path, cut):
+# decodes the message from the abs fft of the previously passed image (stego). if the steganogram was created with a specific cut value,
+# this can also be passed. default is cut=0.4
+def steg_decode(cut = None):
+    global stego_img_path
     stego_img = Image.open(stego_img_path)
 
     stego_r, stego_g, stego_b = stego_img.split() #split image into its RGB channels
@@ -199,3 +237,77 @@ def steg_decode(stego_img_path, cut):
     text, _ = text_from_bits_int(binary)
 
     return text
+
+
+# goes through the whole encoding and decoding process once. returns text and cut value
+def search(string ,gain):
+    cut = steg_encode(string, gain)
+    # ---------------------------------------------------------------------------------------------------------------------
+    # ---------------------------------------------TRANSMISSION------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------------------------
+    # if optcut is enabled, parameter cut is redundant
+    text = steg_decode(cut)
+    
+    return text, cut
+
+
+# doubles gain until one encoding and decoding process succeeds. returns gain and previous gain
+def gain_booster(string, gain=10000):
+    prev_gain = 0
+
+    # reset text
+    Text = ""
+    while Text != string:
+        try:
+            Text, cut = search(string, gain)
+            print("gain\t", gain, "\ttext\t", Text[:10])    
+            if Text != string:
+                prev_gain = gain
+                Text = ""
+                gain *= 2
+        # except UnicodeDecodeError as err:
+        except ValueError as err:
+            print("gain\t", gain, "\ttext\t", Text[:10])    
+            prev_gain = gain
+            Text = ""
+            gain *= 2
+
+    return prev_gain, gain, cut
+
+
+recursive_cnt = 0
+success_gain = 0
+# find the best gain with recursion. returns only successful gain
+def binary_search(string, low, high, num_recur=5):
+    global recursive_cnt
+    global success_gain
+    global success_text
+    recursive_cnt += 1
+    
+    if high >= low:
+        gain = low + (high - low)//2
+
+        try:
+            Text, _ = search(string, gain)
+        except UnicodeDecodeError:
+            Text = ""
+        print("iteration:", recursive_cnt, "\tgain\t", gain, "\tparsed text:\n", Text[:10])
+
+        if recursive_cnt == num_recur:
+            recursive_cnt = 0
+            if Text == string:
+                return gain
+            else:
+                return success_gain
+
+        if Text == string:
+            # save last successful gain
+            success_gain = gain
+            # Search the left half
+            return binary_search(string, low, gain-1)
+            # Search the right half
+        else:
+            return binary_search(string, gain + 1, high)
+
+    else:
+        return -1
