@@ -67,7 +67,9 @@ def message2bin(message_analog, threshold) -> list:
     return digital
 
 
-def create_FFTmask(columns, rows, message_digital, optcut = None) -> tuple:
+# create the mask for the absolute fft by either using the default cut or calculating the optimal with the length of the message
+def create_FFTmask(columns, rows, message_digital) -> tuple:
+    global optcut
     # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
     cut = np.sqrt(2*len(message_digital)/(rows*columns))*1.03
     if cut > 0.7:
@@ -88,6 +90,8 @@ def create_FFTmask(columns, rows, message_digital, optcut = None) -> tuple:
 
     return mask, cut
 
+
+# embed the message into the absolute fft and inverse the fourier transform to recover the channel
 def embedBin2FFT(cover_channel, mask, message_digital):
     fft = np.fft.fft2(cover_channel)
     fft_abs = np.abs(fft)
@@ -138,7 +142,7 @@ def calculate_FFTmask(columns, rows, cut = None):
     return stego_fft_mask
 
 
-# returns a list with analog values (int)
+# returns a list with analog values (int), by shifting the channel into the frequency domain and looking at every pixel where the mask is 0
 def get_message(stego_channel, mask) -> list:
     # transform R channel into frequency domain
     stego_r_fft =np.fft.fft2(stego_channel)
@@ -161,21 +165,18 @@ def get_message(stego_channel, mask) -> list:
     return message_analog
 
 # ------------------------------------------------------------------------------------------------------------
+# some global variables
 cover_img_path = ""
 stego_img_path = ""
 optcut = None
 message = ""
 
+# image path setter
 def set_img_path(cover_path, stego_path):
     global cover_img_path
     global stego_img_path
     cover_img_path = cover_path
     stego_img_path = stego_path
-
-def get_img_path():
-    global cover_img_path
-    global stego_img_path
-    return cover_img_path, stego_img_path
 
 # enable optimal cut
 def set_optcut(enable: bool):
@@ -194,10 +195,9 @@ def set_message(string):
 # encoding happens with a specific gain and cut value
 # the default cut value is 0.4, but an option for optcut can be passed and an optimal cut value will be calculated, which has to be passed to the receiver later on.
 def steg_encode(gain: int) -> float:
+    global message
     global cover_img_path
     global stego_img_path
-    global optcut
-    global message
      # convert utf-8 to binary with 2 bytes prepended for telling length of message
     bin_encoded =  text_to_bits_int(message, gain)
 
@@ -207,7 +207,7 @@ def steg_encode(gain: int) -> float:
     Rot, Grün, Blau= image.split() #split image into its RGB channels
 
     # create rectangular fft mask
-    cover_r_fft_mask, cut = create_FFTmask(*(image.size), bin_encoded, optcut)
+    cover_r_fft_mask, cut = create_FFTmask(*(image.size), bin_encoded)
 
     # cover_r_fft_masked = np.abs(np.fft.fft2(Rot))*cover_r_fft_mask
 
@@ -263,7 +263,7 @@ def search(gain: float) -> tuple:
 
 
 # doubles gain until one encoding and decoding process succeeds. returns gain and previous gain
-def gain_booster(gain: int=1000) -> tuple:
+def gain_booster(gain: int=10000):
     global message
     prev_gain = 0
 
@@ -326,3 +326,12 @@ def binary_search(low, high, num_recur: int=5) -> float:
 
     else:
         return -1
+
+
+# a simple encoder using the default cut value and not improving the gain
+def steg_encode_simple(cover_img_path: str, stego_img_path: str, string: str) -> None:
+    set_img_path(cover_img_path, stego_img_path)
+    set_message(string)
+    set_optcut(False)
+    prev_gain, gain, _ = gain_booster()
+    steg_encode(gain)
