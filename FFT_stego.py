@@ -225,6 +225,8 @@ def steg_encode(gain: int) -> float:
 
     stego_img.save(stego_img_path)     #save image as png
 
+    if cut==0.4:
+        return None
     return cut
 
 # decodes the message from the abs fft of the previously passed image (stego). if the steganogram was created with a specific cut value,
@@ -329,9 +331,10 @@ def binary_search(low, high, num_recur: int=5) -> float:
 
 
 # a simple encoder using the default cut value and not improving the gain
-def steg_encode_simple(cover_img_path: str, stego_img_path: str, string: str) -> None:
+def steg_encode_simple(cover_img_path: str, stego_img_path: str, string: str, optcut: bool) -> None:
     set_img_path(cover_img_path, stego_img_path)
     set_message(string)
-    set_optcut(False)
-    prev_gain, gain, _ = gain_booster()
-    steg_encode(gain)
+    set_optcut(optcut)
+    gain = gain_booster()[1]
+    cut = steg_encode(gain)
+    return cut
