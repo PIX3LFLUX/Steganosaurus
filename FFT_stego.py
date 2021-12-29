@@ -321,20 +321,22 @@ def binary_search(low, high, num_recur: int=5) -> float:
             # save last successful gain
             success_gain = gain
             # Search the left half
-            return binary_search(low, gain-1)
+            return binary_search(low, gain-1, num_recur)
             # Search the right half
         else:
-            return binary_search(gain + 1, high)
+            return binary_search(gain + 1, high, num_recur)
 
     else:
         return -1
 
 
 # a simple encoder using the default cut value and not improving the gain
-def steg_encode_simple(cover_img_path: str, stego_img_path: str, string: str, optcut: bool) -> None:
+def steg_encode_simple(cover_img_path: str, stego_img_path: str, string: str, optcut: bool, recursive_cnt: int=0) -> None:
     set_img_path(cover_img_path, stego_img_path)
     set_message(string)
     set_optcut(optcut)
-    gain = gain_booster()[1]
+    prev_gain, gain = gain_booster()[:2]
+    if recursive_cnt>0:
+        gain = binary_search(prev_gain, gain, recursive_cnt)
     cut = steg_encode(gain)
     return cut
