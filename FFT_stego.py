@@ -1,11 +1,34 @@
 """ string version """
 import numpy as np
 from PIL import Image
+import os
 
+
+# generates the path for the stego image from the name of the cover image and the path the current python file resides on
+def stego_path_generator(cover_img_path: str, img_type: str):
+    full_name = cover_img_path.split("\\")[-1]
+    name = full_name.split(".")[0]
+    steg_name = name + "_steg." + img_type
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
+    return filename + steg_name
+
+# same as the above, but append _crop to the image name
+def crop_path_generator(cover_img_path: str, img_type: str):
+    full_name = cover_img_path.split("\\")[-1]
+    name = full_name.split(".")[0]
+    steg_name = name + "_crop." + img_type
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
+    return filename + steg_name
+
+
+# turns a utf-8 string into its binary counterpart
 def text_to_bits(text, encoding='utf-8', errors='surrogatepass'):
     bits = bin(int.from_bytes(text.encode(encoding, errors), 'big'))[2:]
     return bits.zfill(8 * ((len(bits) + 7) // 8))
 
+# coverts binary into a readable utf-8 string
 def text_from_bits(bits, encoding='utf-8', errors='surrogatepass'):
     n = int(bits,2)
     return n.to_bytes((n.bit_length() + 7) // 8, 'big').decode(encoding, errors) or '\0'
