@@ -14,10 +14,19 @@ def stego_path_generator(cover_img_path: str, img_type: str):
     return filename + steg_name
 
 # same as the above, but append _crop to the image name
-def crop_path_generator(cover_img_path: str, img_type: str):
-    full_name = cover_img_path.split("\\")[-1]
+def crop_path_generator(img_path: str, img_type: str):
+    full_name = img_path.split("\\")[-1]
     name = full_name.split(".")[0]
     steg_name = name + "_crop." + img_type
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
+    return filename + steg_name
+
+# same as the above, but append _crop to the image name
+def resize_path_generator(img_path: str, img_type: str):
+    full_name = img_path.split("\\")[-1]
+    name = full_name.split(".")[0]
+    steg_name = name + "_resize." + img_type
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
     return filename + steg_name
@@ -238,7 +247,8 @@ def steg_encode(gain: int) -> float:
     cover_r_masked = embedBin2FFT(Rot, cover_r_fft_mask, bin_encoded)
 
     # normalize output
-    cover_r_masked_norm = convert(cover_r_masked, 0,255, np.uint8)
+    cover_r_masked_norm = np.clip(cover_r_masked, 0,255)
+    # cover_r_masked_norm = convert(cover_r_masked, 0,255, np.uint8)
 
     # merge layers
     stego =  np.stack((cover_r_masked_norm, Grün, Blau), axis=2).astype('uint8')
@@ -361,5 +371,18 @@ def steg_encode_simple(cover_img_path: str, stego_img_path: str, string: str, op
     prev_gain, gain = gain_booster()[:2]
     if recursive_cnt>0:
         gain = binary_search(prev_gain, gain, recursive_cnt)
+    # overwrite last attempt with successful attempt (takes time, since successful attempt was overwritten)
     cut = steg_encode(gain)
     return cut
+
+def steg_decode_simple(stego_img_path: str, cut: float=None) -> None:
+    set_img_path(cover_img_path, stego_img_path)
+    try:
+        text = steg_decode(cut)
+    except UnicodeDecodeError:
+        print("Message could not be parsed")
+        return
+    except ValueError:
+        print("Message could not be parsed")
+        return
+    return text
