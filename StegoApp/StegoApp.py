@@ -11,7 +11,7 @@ from kivy.uix.popup import Popup
 from kivy.factory import Factory
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.boxlayout import BoxLayout
-import string
+
 #from kivy.core.window import Window
 
 Config.set('graphics', 'resizable', '0') #0 being off 1 being on as in true/false
@@ -50,6 +50,9 @@ class EncodeStegoOptions(Screen):
         recursive_cntGlobal=int(self.recursiveCounter.text)
         print("Recursive Counter: ", recursive_cntGlobal)
 
+class ShowCut(Screen):
+    pass
+
 
 #Entschlüsseln
 class DecodeStego(Screen):
@@ -75,7 +78,7 @@ class LoadDialog(Screen):
             print("Filename:",filename[0])
             print("Cut Global:",cutGlobal)
             print(steg_decode_simple(filename[0],cutGlobal))
-        
+            
             
             
 
@@ -95,6 +98,9 @@ class SaveDialog(Screen):
             print("Recursive Counter:",recursive_cntGlobal)
             cut=steg_encode_simple(filename,secretText,optCutGlobal,recursive_cntGlobal)
             print("Cut:",cut)
+            screen = self.manager.get_screen('showcut')
+            screen.ids['calculatedCut'].text = str(cut)
+
             
             
 
