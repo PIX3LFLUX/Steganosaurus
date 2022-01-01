@@ -31,6 +31,16 @@ def resize_path_generator(img_path: str, img_type: str):
     filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
     return filename + steg_name
 
+# same as the above, but append _crop to the image name
+def rotate_path_generator(img_path: str, img_type: str):
+    full_name = img_path.split("\\")[-1]
+    name = full_name.split(".")[0]
+    steg_name = name + "_rotate." + img_type
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
+    return filename + steg_name
+
+
 
 # turns a utf-8 string into its binary counterpart
 def text_to_bits(text, encoding='utf-8', errors='surrogatepass'):

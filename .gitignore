@@ -9,7 +9,6 @@ ImageSources/Steganograms/remerged_sharp.png
 ImageSources/Steganograms/darth_vader_steg.png
 ImageSources/Steganograms/iron_patriot_crop.png
 ImageSources/Steganograms/iron_patriot_steg.png
-ImageSources/Steganograms/lena_color_256_steg.png
 ImageSources/Steganograms/lena_color_256_steg.tif
 ImageSources/Steganograms/remerged_sharp.png
 ImageSources/Steganograms/remerged_sharp.png
@@ -23,3 +22,6 @@ ImageSources/tif/mandril_gray.tif
 ImageSources/tif/peppers_color.tif
 ImageSources/tif/peppers_gray.tif
 ImageSources/Steganograms/remerged_sharp.png
+ImageSources/Steganograms/lena_color_256_steg_resize.png
+ImageSources/Steganograms/lena_color_256_steg_rotate_rotate.png
+ImageSources/Steganograms/lena_color_256_steg_rotate.png
