@@ -1,5 +1,7 @@
 #initialize the different Screens
 
+#:import Clipboard kivy.core.clipboard.Clipboard
+
 WindowManager:
     MainMenu:  
     DecodeStego:
@@ -7,6 +9,7 @@ WindowManager:
     LoadDialog:
     SaveDialog:
     EncodeStegoOptions:
+    ShowCut:
    
 
 
@@ -121,8 +124,6 @@ WindowManager:
                 app.root.current = "savedialog"
                 root.manager.transition.direction = "left"
                 root.pushMessage()
-                #app.root.current = "main"
-                #root.manager.transition.direction = "right"
 <EncodeStegoOptions>:
     name:"encodeoptions"
     recursiveCounter:recursiveCounter
@@ -154,6 +155,7 @@ WindowManager:
             spacing: 20
 
             Label: 
+                id: optimize
                 pos_hint:  {'center_x':0.2, 'center_y':0.95}
                 text:"optimize cut"
             CheckBox:
@@ -162,6 +164,7 @@ WindowManager:
                 on_active: root.checkbox_click(self, self.active)
                 size_hint_x: .20
         Label: 
+            id: textboxRC
             pos_hint:  {'center_x':0.5, 'center_y':1}
             text:"Enter recursive counter (integer greater 0): "
 
@@ -208,6 +211,31 @@ WindowManager:
                 app.root.current = "loaddialog"
                 root.manager.transition.direction = "left"
                 root.pushCut()
+
+<ShowCut>:
+    name:"showcut"
+    BoxLayout:
+        size: root.width, root.height
+        padding: 50
+        spacing: 20
+        orientation:"vertical"
+
+        RoundedButton:
+            text:"Back"
+            on_release: 
+                app.root.current = "main"
+                root.manager.transition.direction = "left"
+        Label:
+            text:"Your secret Key:"
+
+        TextInput:
+            id: calculatedCut
+            multiline:False
+        RoundedButton:
+            text:"Copy to clipboard"
+            on_release:
+                self.text = "Copied!"
+                Clipboard.copy(calculatedCut.text)
                 
 <LoadDialog>:
     name:"loaddialog"
@@ -261,7 +289,7 @@ WindowManager:
                 on_release:
                     text:"encoding"
                     root.save(filechooser.path, text_input.text)
-                    app.root.current = "encodeoptions"
+                    app.root.current = "showcut"
                     root.manager.transition.direction = "right"
 
 
