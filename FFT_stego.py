@@ -232,9 +232,9 @@ def set_message(string):
     message = string
 
 # set the colorspace according to the colorspace map below
-def set_colorspace(spacecode: int):
+def set_colorspace(string: str):
     global colorspace
-    colorspace = spacecode
+    colorspace = string
 
 
 # encodes string into abs fft of the image previously declared with set_img_path().
@@ -268,7 +268,7 @@ def steg_encode(gain: int) -> float:
     stego =  np.stack((channel0, cover_masked_norm, channel2), axis=2).astype('uint8')
 
     # create steganogram
-    stego_img = Image.fromarray(stego, mode=image.mode).convert("RGB")
+    stego_img = Image.fromarray(stego, mode=colorspace).convert("RGB")
 
     stego_img.save(stego_img_path)     #save image as png
 
@@ -380,7 +380,7 @@ def binary_search(low, high, num_recur: int=5) -> float:
 
 
 # a simple encoder using the default cut value and not improving the gain
-def steg_encode_simple(cover_img_path: str, string: str, optcut: bool, recursive_cnt: int=0, colorspace: str="RGB") -> None:
+def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, recursive_cnt: int=0, colorspace: str="RGB") -> None:
     stego_img_path = stego_path_generator(cover_img_path, "png")
     set_img_path(cover_img_path, stego_img_path)
     set_message(string)
