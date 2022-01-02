@@ -1,0 +1,307 @@
+#initialize the different Screens
+
+#:import Clipboard kivy.core.clipboard.Clipboard
+
+WindowManager:
+    MainMenu:  
+    DecodeStego:
+    EncodeStego:
+    LoadDialog:
+    SaveDialog:
+    EncodeStegoOptions:
+    ShowCut:
+   
+
+
+#describe whats in the Screens(Design)
+
+<MainMenu>:
+    name:"main"
+
+    BoxLayout:
+        
+        orientation:"vertical"
+        size: root.width, root.height
+        padding: 10
+        spacing: 100
+
+        Label:
+            markup: True
+            text: "[b][font=times]FFT Stego App[/font][/b]"
+            font_size:30
+            pos_hint: {'center_y': 0.9}
+            pos_hint: {'center_x': 0.5}
+           
+        RoundedButton: 
+            markup: True
+            text: "[b]Encode\nStego Image[/b]"
+            font_size: 20
+            pos_hint: {'center_x': 0.5}
+            size_hint:(None,None)
+            width: 200
+            height: 100
+            on_release: 
+                app.root.current = "encode"
+                root.manager.transition.direction = "left"
+
+        RoundedButton: 
+            markup: True
+            text: "[b]Decode\nStego Image[/b]"
+            font_size: 20
+            pos_hint: {'center_x': 0.5}
+            size_hint:(None,None)
+            width: 200
+            height: 100
+            on_release: 
+                app.root.current = "decode"
+                root.manager.transition.direction = "left"
+
+        Label:
+            text: "By Deniz Braun\nand Maximilian Ketschik"
+            font_size: 15
+            pos_hint: {'center_y': 0.98}
+            pos_hint: {'center_x': 0.5}
+            size_hint:(None,None)
+            width: 80
+            height: 50
+
+
+
+#Verschlüsseln
+<EncodeStego>:
+    name:"encode"
+    message:message
+
+    BoxLayout:
+        orientation:"vertical"
+        size: root.width, root.height
+        padding: 50
+        spacing: 20
+
+        BoxLayout:
+            orientaion:"horizontal"
+            size: root.width, root.height
+            spacing: 30
+
+            RoundedButton:
+                
+                markup: True
+                text: "[b]Back[/b]"
+                font_size: 15
+                pos_hint:  {'center_x':0.05, 'center_y':0.95} 
+                size_hint:(None,None)
+                width: 100
+                height: 50
+                on_release: 
+                    app.root.current = "main"
+                    root.manager.transition.direction = "right"
+            
+            RoundedButton:
+                
+                markup: True
+                text: "[b]Options[/b]"
+                font_size: 15
+                pos_hint:  {'center_x':0.95, 'center_y':0.95} 
+                size_hint:(None,None)
+                width: 100
+                height: 50
+                on_release: 
+                    app.root.current = "encodeoptions"
+                    root.manager.transition.direction = "right"        
+
+        Label:
+            text:"Input your Secret Message"
+
+        TextInput:
+            id: message
+            multiline:True
+
+        RoundedButton: 
+            markup: True
+            text: "[b]Choose\nStego Image[/b]"
+            font_size: 32
+            on_release: 
+                app.root.current = "savedialog"
+                root.manager.transition.direction = "left"
+                root.pushMessage()
+<EncodeStegoOptions>:
+    name:"encodeoptions"
+    recursiveCounter:recursiveCounter
+    
+    BoxLayout:
+        orientation:"vertical"
+        size: root.width, root.height
+        padding: 50
+        spacing: 20
+
+        RoundedButton:
+                
+            markup: True
+            text: "[b]Back[/b]"
+            font_size: 15
+            pos_hint:  {'center_x':0.2, 'center_y':0.95} 
+            size_hint:(None,None)
+            width: 100
+            height: 50
+            on_release: 
+                app.root.current = "encode"
+                root.manager.transition.direction = "left"
+                root.pushRecursiveCounter()
+
+        BoxLayout:
+            orientation:"horizontal"
+            size: root.width, root.height
+            padding: 50
+            spacing: 20
+
+            Label: 
+                id: optimize
+                pos_hint:  {'center_x':0.2, 'center_y':0.95}
+                text:"optimize cut"
+            CheckBox:
+                pos_hint:  {'center_x':0.2, 'center_y':0.95}
+                color:.294, .761, .623
+                on_active: root.checkbox_click(self, self.active)
+                size_hint_x: .20
+        Label: 
+            id: textboxRC
+            pos_hint:  {'center_x':0.5, 'center_y':1}
+            text:"Enter recursive counter (integer greater 0): "
+
+        TextInput:
+            id: recursiveCounter
+            multiline:True
+#Entschlüsseln
+<DecodeStego>:
+    cut:cut
+    name:"decode"
+
+    BoxLayout:
+        orientation:"vertical"
+        size: root.width, root.height
+        padding: 50
+        spacing: 20
+
+       
+
+        RoundedButton:
+            markup: True
+            text: "[b]Back[/b]" 
+            font_size: 15
+            pos_hint: {'center_x': 0.05} 
+            size_hint:(None,None)
+            width: 100
+            height: 50
+            on_release: 
+                app.root.current = "main"
+                root.manager.transition.direction = "right"
+
+        Label:
+            text:"Input your Secret Key"
+
+        TextInput:
+            id:cut
+            multiline:True
+
+        RoundedButton: 
+            markup: True
+            text: "[b]Load\nStego Image[/b]"
+            font_size: 32
+            on_release: 
+                app.root.current = "loaddialog"
+                root.manager.transition.direction = "left"
+                root.pushCut()
+
+<ShowCut>:
+    name:"showcut"
+    BoxLayout:
+        size: root.width, root.height
+        padding: 50
+        spacing: 20
+        orientation:"vertical"
+
+        RoundedButton:
+            text:"Back"
+            on_release: 
+                app.root.current = "main"
+                root.manager.transition.direction = "left"
+        Label:
+            text:"Your secret Key:"
+
+        TextInput:
+            id: calculatedCut
+            multiline:False
+        RoundedButton:
+            text:"Copy to clipboard"
+            on_release:
+                self.text = "Copied!"
+                Clipboard.copy(calculatedCut.text)
+                
+<LoadDialog>:
+    name:"loaddialog"
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: 
+                    app.root.current = "decode"
+                    root.manager.transition.direction = "right"
+            Button:
+                text: "Load and show"
+                on_release: root.load(filechooser.path, filechooser.selection)
+
+<SaveDialog>:
+    name:"savedialog"
+    text_input: text_input
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+            on_selection: text_input.text = self.selection and self.selection[0] or ''
+
+        TextInput:
+            id: text_input
+            size_hint_y: None
+            height: 30
+            multiline: False
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: 
+                    app.root.current = "encode"
+                    root.manager.transition.direction = "right"
+
+            Button:
+                text: "Load and hide"
+                on_release:
+                    text:"encoding"
+                    root.save(filechooser.path, text_input.text)
+                    app.root.current = "showcut"
+                    root.manager.transition.direction = "right"
+
+
+
+<RoundedButton@Button>
+
+    background_color:(0,0,0,0)
+    background_normal:''
+    canvas.before:
+        Color:
+            rgba:(48/255,84/255,150/255,1)
+        RoundedRectangle:
+            size:self.size
+            pos: self.pos
+            radius:[20]
