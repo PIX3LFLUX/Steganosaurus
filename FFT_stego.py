@@ -114,10 +114,10 @@ def create_FFTmask(columns, rows, message_digital) -> tuple:
     global optcut
     # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
     cut = np.sqrt(2*len(message_digital)/(rows*columns))*1.03
-    if cut > 0.4:
+    if cut > max_cut:
         raise Exception("The message is too large. Major distortions are to be expected.")
     elif not optcut:
-        cut = 0.4
+        cut = max_cut
 
     #cut off high frequencies from R channel
     mask = np.full((rows, columns), True)
@@ -170,7 +170,7 @@ def embedBin2FFT(cover_channel, mask, message_digital):
 # calculate and return mask, default cut = 0.4
 def calculate_FFTmask(columns, rows, cut = None):
     if not cut:
-        cut = 0.4
+        cut = max_cut
     stego_fft_mask = np.full((rows, columns), True)
     row_start = round(rows/2*(1-cut))
     row_stop = round(rows/2*(1+cut))
@@ -210,6 +210,7 @@ stego_img_path = ""
 optcut = None
 message = ""
 colorspace = ""
+max_cut = 0.4
 
 # image path setter
 def set_img_path(cover_path, stego_path):
@@ -236,6 +237,9 @@ def set_colorspace(string: str):
     global colorspace
     colorspace = string
 
+def set_maxcut(cut: float):
+    global max_cut
+    max_cut = cut
 
 # encodes string into abs fft of the image previously declared with set_img_path().
 # encoding happens with a specific gain and cut value
@@ -245,14 +249,15 @@ def steg_encode(gain: int) -> float:
     global cover_img_path
     global stego_img_path
     global colorspace
-     # convert utf-8 to binary with 2 bytes prepended for telling length of message
-    bin_encoded =  text_to_bits_int(message, gain)
 
     image = Image.open(cover_img_path).convert(colorspace)
     # image.load()
 
     # image = convert_colorspace(image, 0, colorspace)
     channel0, channel1, channel2 = image.split() #split image into its 3 channels
+
+     # convert utf-8 to binary with 2 bytes prepended for telling length of message
+    bin_encoded =  text_to_bits_int(message, gain)
 
     # create rectangular fft mask
     cover_fft_mask, cut = create_FFTmask(*(image.size), bin_encoded)
@@ -272,7 +277,7 @@ def steg_encode(gain: int) -> float:
 
     stego_img.save(stego_img_path)     #save image as png
 
-    if cut==0.4:
+    if cut==max_cut:
         return None
     return cut
 
