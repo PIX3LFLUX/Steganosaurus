@@ -80,8 +80,7 @@ def text_from_bits_int(bits: list):
     string_bits = [str(i) for i in bits[16:message_len+16]]
     string_concat = ""
     # concatenate each element to one string
-    for string in string_bits:
-        string_concat += string
+    string_concat = "".join(string_bits)
     string_decode = text_from_bits(string_concat)
     return string_decode, message_len
 
@@ -121,10 +120,10 @@ def create_FFTmask(columns, rows, message_digital) -> tuple:
 
     #cut off high frequencies from R channel
     mask = np.full((rows, columns), True)
-    row_start = round(rows/2*(1-cut))
-    row_stop = round(rows/2*(1+cut))
-    col_start = round(columns/2*(1-cut))
-    col_stop = round(columns/2*(1+cut))
+    row_start = np.around(rows/2*(1-cut), decimals=0).astype(np.uint16)
+    row_stop =  np.around(rows/2*(1+cut), decimals=0).astype(np.uint16)
+    col_start = np.around(columns/2*(1-cut), decimals=0).astype(np.uint16)
+    col_stop =  np.around(columns/2*(1+cut), decimals=0).astype(np.uint16)
     mask[row_start:row_stop, col_start:col_stop] = False  # rectangular
 
     return mask, cut
@@ -172,10 +171,10 @@ def calculate_FFTmask(columns, rows, cut = None):
     if not cut:
         cut = max_cut
     stego_fft_mask = np.full((rows, columns), True)
-    row_start = round(rows/2*(1-cut))
-    row_stop = round(rows/2*(1+cut))
-    col_start = round(columns/2*(1-cut))
-    col_stop = round(columns/2*(1+cut))
+    row_start = np.around(rows/2*(1-cut), decimals=0).astype(np.uint16)
+    row_stop =  np.around(rows/2*(1+cut), decimals=0).astype(np.uint16)
+    col_start = np.around(columns/2*(1-cut), decimals=0).astype(np.uint16)
+    col_stop =  np.around(columns/2*(1+cut), decimals=0).astype(np.uint16)
     stego_fft_mask[row_start:row_stop, col_start:col_stop] = False  # rectangular
 
     return stego_fft_mask
