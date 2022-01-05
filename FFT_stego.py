@@ -210,6 +210,9 @@ optcut = None
 message = ""
 colorspace = ""
 max_cut = 0.4
+max_row = 900
+max_col = 1600
+image = None
 
 # image path setter
 def set_img_path(cover_path, stego_path):
@@ -236,9 +239,46 @@ def set_colorspace(string: str):
     global colorspace
     colorspace = string
 
+# manually increase the maximum cutout of the mask
 def set_maxcut(cut: float):
     global max_cut
     max_cut = cut
+
+# manually set resize size
+def set_resize_max(row: int, col: int):
+    global max_row
+    global max_col
+    max_row = row
+    max_col = col
+
+# resize image if too large (>1600/900) and return Pillow Image object (not stored yet)
+def resize(cover_img_path: str) -> Image:
+    image = Image.open(cover_img_path)
+    # get real size
+    cols, rows = image.size
+
+    # handle exception first
+    if (cols < 1600) and (rows < 900):
+        return image
+
+    # calculate aspect ratio
+    ratio = cols/rows
+
+    # check if either dimension is greater than 1600:900
+    if ratio >= 16/9:
+        # resize columns to max (1600) and adjust rows accordingly
+        if cols > 1600:
+            new_cols = 1600
+            new_rows = new_cols//ratio
+    else:
+        # resize rows to max (900) and adjust columns accordingly
+        if rows > 900:
+            new_rows = 900
+            new_cols = new_rows//ratio
+
+    im_resize = image.resize((round(new_cols), round(new_rows)))
+    return im_resize
+
 
 # encodes string into abs fft of the image previously declared with set_img_path().
 # encoding happens with a specific gain and cut value
@@ -248,9 +288,12 @@ def steg_encode(gain: int) -> float:
     global cover_img_path
     global stego_img_path
     global colorspace
+    global image
 
-    image = Image.open(cover_img_path).convert(colorspace)
-    # image.load()
+    if not image:
+        # cache loaded image
+        image = resize(cover_img_path).convert(colorspace)
+        image.load()
 
     # image = convert_colorspace(image, 0, colorspace)
     channel0, channel1, channel2 = image.split() #split image into its 3 channels
@@ -288,7 +331,9 @@ def steg_decode(cut: float=None) -> str:
     stego_img = Image.open(stego_img_path).convert(colorspace)
 
     # stego_img = convert_colorspace(stego_img, 0, colorspace)
-    steg_channel0, steg_channel1, steg_channel2 = stego_img.split() #split image into its RGB channels
+    # steg_channel0, steg_channel1, steg_channel2 = stego_img.split() #split image into its 3 channels
+    # works slightly faster
+    steg_channel1 = stego_img.getchannel(1) #split image into its 3 channels
 
     stego_fft_mask = calculate_FFTmask(*(stego_img.size), cut)
 
@@ -327,14 +372,14 @@ def gain_booster(gain: int=10000):
     while Text != message:
         try:
             Text, cut = search(gain)
-            print("gain\t", gain, "\ttext\t", Text[:10])    
+            print("gain: ", gain, "\ttext: ", Text[:10])    
             if Text != message:
                 prev_gain = gain
                 Text = ""
                 gain *= 2
         # except UnicodeDecodeError as err:
         except ValueError as err:
-            print("gain\t", gain, "\ttext\t", Text[:10])    
+            print("gain: ", gain, "\ttext: ", Text[:10])    
             prev_gain = gain
             Text = ""
             gain *= 2
@@ -361,7 +406,7 @@ def binary_search(low, high, num_recur: int=5) -> float:
             Text = ""
         except ValueError:
             Text = ""
-        print("iteration:", recursive_cnt, "\tgain\t", gain, "\tparsed text:\n", Text[:10])
+        print("recur:", recursive_cnt, "\tgain: ", gain, "\tparsed text: ", Text[:10])
 
         if recursive_cnt == num_recur:
             recursive_cnt = 0
