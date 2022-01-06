@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import os
 
+from time import perf_counter
 
 # generates the path for the stego image from the name of the cover image and the path the current python file resides on
 def stego_path_generator(cover_img_path: str, img_type: str):
@@ -119,12 +120,12 @@ def create_FFTmask(columns, rows, message_digital) -> tuple:
         cut = max_cut
 
     #cut off high frequencies from R channel
-    mask = np.full((rows, columns), True)
+    mask = np.full((rows, columns), False)
     row_start = np.around(rows/2*(1-cut), decimals=0).astype(np.uint16)
     row_stop =  np.around(rows/2*(1+cut), decimals=0).astype(np.uint16)
     col_start = np.around(columns/2*(1-cut), decimals=0).astype(np.uint16)
     col_stop =  np.around(columns/2*(1+cut), decimals=0).astype(np.uint16)
-    mask[row_start:row_stop, col_start:col_stop] = False  # rectangular
+    mask[row_start:row_stop, col_start:col_stop] = True  # rectangular
 
     return mask, cut
 
@@ -133,36 +134,16 @@ def create_FFTmask(columns, rows, message_digital) -> tuple:
 def embedBin2FFT(cover_channel, mask, message_digital):
     fft = np.fft.fft2(cover_channel)
     fft_abs = np.abs(fft)
-    rows, cols = fft_abs.shape
     
-    # cache message length
     message_len = len(message_digital)
-    counter=0
-    for i in range(rows):
-        # if cover_rows == 50:
-        #     print("max values", np.max(cover_r_fft_abs[i]))
-        for j in range(cols):
-            # write where coefficients are zero -> previously filtered out.
-            if mask[i,j]==0:
-                if counter==message_len:
-                    break
-                # write hidden message inside absolute part by overwriting coefficients where the mask is 0
-                fft_abs[i,j]=message_digital[counter]
-                # print(cover_r_fft_abs[i,j])
-                counter+=1
 
-    # # mirror reverse loop
-    # counter = 0
-    # for i in range(cover_rows-1, -1, -1):
-    #     for j in range(cover_cols-1, -1, -1):
-    #         if cover_r_fft_mask[i,j]==0:
-    #             if counter < len(bin_encoded):
-    #                 cover_r_fft_abs[i,j]=bin_encoded[counter]
-    #                 counter+=1
-
+    masked_fft = fft_abs[mask]
+    for ii in range(message_len):
+        masked_fft[ii] = message_digital[ii]
+    fft_abs[mask] = masked_fft
+    
     #IFFT on single channel. Take filtered absolute and inverse with original phase, imaginary part should be negligable
-    cover_masked = np.fft.ifft2(fft_abs*np.exp(1j*np.angle(fft))).real
-    # print(cover_r_masked)
+    cover_masked = np.fft.ifft2(np.multiply(fft_abs, np.exp(np.multiply(1j, np.angle(fft))))).real
     return cover_masked
 
 
@@ -170,12 +151,12 @@ def embedBin2FFT(cover_channel, mask, message_digital):
 def calculate_FFTmask(columns, rows, cut = None):
     if not cut:
         cut = max_cut
-    stego_fft_mask = np.full((rows, columns), True)
+    stego_fft_mask = np.full((rows, columns), False)
     row_start = np.around(rows/2*(1-cut), decimals=0).astype(np.uint16)
     row_stop =  np.around(rows/2*(1+cut), decimals=0).astype(np.uint16)
     col_start = np.around(columns/2*(1-cut), decimals=0).astype(np.uint16)
     col_stop =  np.around(columns/2*(1+cut), decimals=0).astype(np.uint16)
-    stego_fft_mask[row_start:row_stop, col_start:col_stop] = False  # rectangular
+    stego_fft_mask[row_start:row_stop, col_start:col_stop] = True  # rectangular
 
     return stego_fft_mask
 
@@ -185,20 +166,15 @@ def get_message(stego_channel, mask) -> list:
     # transform R channel into frequency domain
     stego_fft =np.fft.fft2(stego_channel)
     stego_fft_abs = np.abs(stego_fft)
-    rows, cols = stego_fft_abs.shape
 
-    # calculate message length from mask
-    message_length = int(np.count_nonzero(mask == False)//2)
-
+    # calculate message length from mask -> predicted message length > true message length!
+    message_length = int(np.count_nonzero(mask == True)//2)
+    # create message buffer
     message_analog=np.zeros(message_length, dtype='uint32')
-    counter=0
-    for i in range(rows):
-        for j in range(cols):
-            if mask[i,j]==0:
-                if counter==message_length:
-                    break
-                message_analog[counter] = stego_fft_abs[i,j]
-                counter+=1 
+    
+    stego_fft_masked = stego_fft_abs[mask]
+    for ii in range(message_length):
+        message_analog[ii] = stego_fft_masked[ii]
 
     return message_analog
 
@@ -212,7 +188,6 @@ colorspace = ""
 max_cut = 0.4
 max_row = 900
 max_col = 1600
-image = None
 
 # image path setter
 def set_img_path(cover_path, stego_path):
@@ -288,12 +263,8 @@ def steg_encode(gain: int) -> float:
     global cover_img_path
     global stego_img_path
     global colorspace
-    global image
 
-    if not image:
-        # cache loaded image
-        image = resize(cover_img_path).convert(colorspace)
-        image.load()
+    image = resize(cover_img_path).convert(colorspace)
 
     # image = convert_colorspace(image, 0, colorspace)
     channel0, channel1, channel2 = image.split() #split image into its 3 channels
