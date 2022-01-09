@@ -256,9 +256,9 @@ def resize(cover_img_path: str) -> Image:
         # resize rows to max (900) and adjust columns accordingly
         if rows > max_row:
             new_rows = max_row
-            new_cols = np.round(new_rows*ratio, decimals=0)
+            new_cols = int(np.around(new_rows*ratio, decimals=0))
 
-    im_resize = image.resize((round(new_cols), round(new_rows)))
+    im_resize = image.resize((int(np.around(new_cols, decimals=0)), int(np.around(new_rows, decimals=0))))
     return im_resize
 
 
