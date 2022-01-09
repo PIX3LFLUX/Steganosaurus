@@ -37,3 +37,7 @@ ImageSources/Steganograms/lena_color_512_steg.tif
 ImageSources/Steganograms/remerged_sharp.png
 Stego/main.py
 Stego/StegoApp.kv
+Stego/buildozer.spec
+Stego/StegoApp.kv
+Stego/StegoApp.kv
+Stego/StegoApp.kv

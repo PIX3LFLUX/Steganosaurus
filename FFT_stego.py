@@ -347,7 +347,7 @@ def search(gain: float) -> tuple:
 
 
 # doubles gain until one encoding and decoding process succeeds. returns gain and previous gain
-def gain_booster(gain: int=10000):
+def gain_booster(gain: int=10000) -> tuple:
     global message
     prev_gain = 0
 
