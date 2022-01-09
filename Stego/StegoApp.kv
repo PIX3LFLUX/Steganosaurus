@@ -8,7 +8,8 @@ WindowManager:
     DecodeStego:
     EncodeStego:
     LoadDialog:
-    SaveDialog:
+    CreateStego:
+    # SaveDialog:
     EncodeStegoOptions:
     ShowCut:
    
@@ -122,7 +123,7 @@ WindowManager:
             text: "[b]Choose\nStego Image[/b]"
             font_size: 32
             on_release: 
-                app.root.current = "savedialog"
+                app.root.current = "createstego"
                 root.manager.transition.direction = "left"
                 root.pushMessage()
 <EncodeStegoOptions>:
@@ -269,8 +270,43 @@ WindowManager:
                 text: "Load and show"
                 on_release: root.load(filechooser.path, filechooser.selection)
 
-<SaveDialog>:
-    name:"savedialog"
+# <SaveDialog>:
+#     name:"savedialog"
+#     text_input: text_input
+#     BoxLayout:
+#         size: root.size
+#         pos: root.pos
+#         orientation: "vertical"
+#         FileChooserListView:
+#             id: filechooser
+#             rootpath: '/' if platform == 'win' else '/storage/emulated/0/'
+#             on_selection: text_input.text = self.selection and self.selection[0] or ''
+
+#         TextInput:
+#             id: text_input
+#             size_hint_y: None
+#             height: 30
+#             multiline: False
+
+#         BoxLayout:
+#             size_hint_y: None
+#             height: 30
+#             Button:
+#                 text: "Cancel"
+#                 on_release: 
+#                     app.root.current = "encode"
+#                     root.manager.transition.direction = "right"
+
+#             Button:
+#                 text: "Load and hide"
+#                 on_release:
+#                     text:"encoding"
+#                     root.save(filechooser.path, filechooser.selection)
+#                     app.root.current = "showcut"
+#                     root.manager.transition.direction = "right"
+
+<CreateStego>:
+    name:"createstego"
     text_input: text_input
     BoxLayout:
         size: root.size
@@ -297,11 +333,12 @@ WindowManager:
                     root.manager.transition.direction = "right"
 
             Button:
-                text: "Load and hide"
+                text: "Load"
                 on_release:
                     text:"encoding"
-                    root.save(filechooser.path, filechooser.selection)
-                    app.root.current = "showcut"
+                    #root.save(filechooser.path, filechooser.selection)
+                    # app.root.current = "showcut"
+                    filechooser.path
                     root.manager.transition.direction = "right"
 
 

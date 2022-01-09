@@ -30,3 +30,10 @@ ImageSources/Steganograms/lena_color_256_steg_resize_resize.png
 ImageSources/Steganograms/remerged_sharp.png
 ImageSources/Steganograms/lena_color_256_steg_resize.png
 ImageSources/Steganograms/remerged_sharp.png
+~$AppLayout_0.drawio.dtmp
+AppLayout_0.drawio
+ImageSources/Steganograms/IMG_20220109_222259_resize.png
+ImageSources/Steganograms/lena_color_512_steg.tif
+ImageSources/Steganograms/remerged_sharp.png
+Stego/main.py
+Stego/StegoApp.kv

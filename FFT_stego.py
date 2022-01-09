@@ -7,12 +7,14 @@ from time import perf_counter
 
 # generates the path for the stego image from the name of the cover image and the path the current python file resides on
 def stego_path_generator(cover_img_path: str, img_type: str):
-    full_name = cover_img_path.split("\\")[-1]
-    name = full_name.split(".")[0]
+    full_name = str(os.path.basename(cover_img_path))
+    name = full_name.rsplit(".", maxsplit=1)[0]
     steg_name = name + "_steg." + img_type
-    dirname = os.path.dirname(__file__)
-    filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
-    return filename + steg_name
+    cwdname = os.getcwd()
+    if not os.path.exists(cwdname + "\\Steganograms"):
+        os.mkdir(os.path.join(cwdname, "Steganograms"))
+    filedir = os.path.join(cwdname, "Steganograms")
+    return os.path.join(filedir, steg_name)
 
 # same as the above, but append _crop to the image name
 def crop_path_generator(img_path: str, img_type: str):
@@ -188,6 +190,7 @@ colorspace = ""
 max_cut = 0.4
 max_row = 900
 max_col = 1600
+resize_enable = False
 
 # image path setter
 def set_img_path(cover_path, stego_path):
@@ -226,6 +229,10 @@ def set_resize_max(row: int, col: int):
     max_row = row
     max_col = col
 
+def enable_resize(enable: bool):
+    global resize_enable
+    resize_enable = enable
+
 # resize image if too large (>1600/900) and return Pillow Image object (not stored yet)
 def resize(cover_img_path: str) -> Image:
     image = Image.open(cover_img_path)
@@ -233,23 +240,23 @@ def resize(cover_img_path: str) -> Image:
     cols, rows = image.size
 
     # handle exception first
-    if (cols < 1600) and (rows < 900):
+    if (cols < max_col) and (rows < max_row):
         return image
 
     # calculate aspect ratio
     ratio = cols/rows
 
     # check if either dimension is greater than 1600:900
-    if ratio >= 16/9:
+    if ratio >= max_col/max_row:
         # resize columns to max (1600) and adjust rows accordingly
-        if cols > 1600:
-            new_cols = 1600
+        if cols > max_col:
+            new_cols = max_col
             new_rows = new_cols//ratio
     else:
         # resize rows to max (900) and adjust columns accordingly
-        if rows > 900:
-            new_rows = 900
-            new_cols = new_rows//ratio
+        if rows > max_row:
+            new_rows = max_row
+            new_cols = np.round(new_rows*ratio, decimals=0)
 
     im_resize = image.resize((round(new_cols), round(new_rows)))
     return im_resize
@@ -263,8 +270,14 @@ def steg_encode(gain: int) -> float:
     global cover_img_path
     global stego_img_path
     global colorspace
+    global resize_enable
 
-    image = resize(cover_img_path).convert(colorspace)
+    if resize_enable:
+        image = resize(cover_img_path)
+    else:
+        image = Image.open(cover_img_path)
+    
+    image.convert(colorspace)
 
     # image = convert_colorspace(image, 0, colorspace)
     channel0, channel1, channel2 = image.split() #split image into its 3 channels
@@ -354,6 +367,8 @@ def gain_booster(gain: int=10000):
             prev_gain = gain
             Text = ""
             gain *= 2
+        if gain > 1_000_000:
+            raise Exception("Gain is too high, aborting encoding.")
 
     return prev_gain, gain, cut
 
@@ -400,12 +415,13 @@ def binary_search(low, high, num_recur: int=5) -> float:
 
 
 # a simple encoder using the default cut value and not improving the gain
-def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, recursive_cnt: int=0, colorspace: str="RGB") -> None:
-    stego_img_path = stego_path_generator(cover_img_path, "png")
+def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, recursive_cnt: int=0, colorspace: str="RGB", resize: bool=False) -> None:
+    stego_img_path = stego_path_generator(cover_img_path, "tif")
     set_img_path(cover_img_path, stego_img_path)
     set_message(string)
     set_optcut(optcut)
     set_colorspace(colorspace)
+    enable_resize(resize)
     prev_gain, gain = gain_booster()[:2]
     if recursive_cnt>0:
         gain = binary_search(prev_gain, gain, recursive_cnt)

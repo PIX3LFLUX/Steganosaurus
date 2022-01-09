@@ -12,9 +12,9 @@ from kivy.factory import Factory
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.bubble import Bubble, BubbleButton
-from android.permissions import request_permissions, Permission
-request_permissions([Permission.WRITE_EXTERNAL_STORAGE])
-request_permissions([Permission.READ_EXTERNAL_STORAGE])
+# from android.permissions import request_permissions, Permission
+# request_permissions([Permission.WRITE_EXTERNAL_STORAGE])
+# request_permissions([Permission.READ_EXTERNAL_STORAGE])
 
 __version__ = "1.0.3"
 
@@ -74,6 +74,8 @@ class DecodeStego(Screen):
         print("Cut:",cutGlobal)
 
         #return cutGlobal
+
+
 #Load Decoded File and show message
 class LoadDialog(Screen):
     load = ObjectProperty(None)
@@ -90,30 +92,27 @@ class LoadDialog(Screen):
             
             
 
-#Create and Save Encoded File
-class SaveDialog(Screen):
-    save = ObjectProperty(None)
-    text_input = ObjectProperty(None)
-    cancel = ObjectProperty(None)
+#Create Encoded File
+class CreateStego(Screen):
+    def create(self, path, filename):
+        print("Text:",secretText)
+        print("Optcut enabled?:",optCutGlobal)
+        print("Recursive Counter:",recursive_cntGlobal)
+        cut=steg_encode_simple(filename[0],secretText,optCutGlobal,recursive_cntGlobal)
+        print("Cut:",cut)
+        screen = self.manager.get_screen('showcut')
+        screen.ids['calculatedCut'].text = str(cut)
 
-    def save(self, path, filename):
-        global cutStego
-        with open(os.path.join(path, filename[0]))as stream:
-            
+# # Save Encoded File
+# class SaveDialog(Screen):
+#     save = ObjectProperty(None)
+#     text_input = ObjectProperty(None)
+#     cancel = ObjectProperty(None)
 
-            
-
-            print("TEST")
-            print("TEST")
-            print("Filename:",filename[0])
-            print("Text:",secretText)
-            print("Optcut enabled?:",optCutGlobal)
-            print("Recursive Counter:",recursive_cntGlobal)
-            cut=steg_encode_simple(filename[0],secretText,optCutGlobal,recursive_cntGlobal)
-            print("Cut:",cut)
-            screen = self.manager.get_screen('showcut')
-            screen.ids['calculatedCut'].text = str(cut)
-
+#     def save(self, path, filename):
+#         global cutStego
+#         with open(os.path.join(path, filename[0]))as stream:
+#             print("Filename:",filename[0])
             
             
 
@@ -138,9 +137,9 @@ class AwesomeApp(App):
         return kv
 
 
-Factory.register('Root', cls=Root)
-Factory.register('LoadDialog', cls=LoadDialog)
-Factory.register('SaveDialog', cls=SaveDialog)
+# Factory.register('Root', cls=Root)
+# Factory.register('LoadDialog', cls=LoadDialog)
+# Factory.register('CreateDialog', cls=CreateStego)
 
 if __name__ =='__main__':
     AwesomeApp().run()
