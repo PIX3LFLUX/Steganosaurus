@@ -7,12 +7,33 @@ from time import perf_counter
 
 # generates the path for the stego image from the name of the cover image and the path the current python file resides on
 def stego_path_generator(cover_img_path: str, img_type: str):
+
+    filename= os.path.basename(cover_img_path)
+    print("FILENAME",filename)
+    stegoname= "steg"+filename
+    print("STEGONAME",stegoname)
+    location = os.path.dirname(cover_img_path)
+
+    print("RETURN",location+"/"+stegoname)
+
+    return location + "/" + stegoname
+    '''
     full_name = cover_img_path.split("\\")[-1]
     name = full_name.split(".")[0]
     steg_name = name + "_steg." + img_type
     dirname = os.path.dirname(cover_img_path)
     filename = os.path.join(dirname)
     return filename +"\\" +steg_name
+    '''
+
+'''
+import os
+file_location = '/srv/volume1/data/eds/eds_report.csv'
+file_name = os.path.basename(file_location )  #eds_report.csv
+location = os.path.dirname(file_location )    #/srv/volume1/data/eds
+
+f you want to convert a list to a string, consider using "".join(mylist).
+'''
 
 # same as the above, but append _crop to the image name
 def crop_path_generator(img_path: str, img_type: str):
@@ -269,7 +290,7 @@ def steg_encode(gain: int) -> float:
     #image =Image.open(cover_img_path)
     #image.load()
 
-    resizeImage=False
+    resizeImage=True
 
     if resizeImage == True:
         image = resize(cover_img_path).convert(colorspace)
@@ -301,7 +322,7 @@ def steg_encode(gain: int) -> float:
     # create steganogram
     stego_img = Image.fromarray(stego, mode=colorspace).convert("RGB")
 
-    stego_img.save(stego_img_path)     #save image as png
+    stego_img.save(stego_img_path, format= "png")     #save image as png
 
     if cut==max_cut:
         return None
