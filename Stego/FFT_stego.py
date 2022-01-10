@@ -3,11 +3,37 @@ import numpy as np
 from PIL import Image
 import os
 
+from time import perf_counter
 
 # generates the path for the stego image from the name of the cover image and the path the current python file resides on
 def stego_path_generator(cover_img_path: str, img_type: str):
-    
-    return cover_img_path
+
+    filename= os.path.basename(cover_img_path)
+    print("FILENAME",filename)
+    stegoname= "steg"+filename
+    print("STEGONAME",stegoname)
+    location = os.path.dirname(cover_img_path)
+
+    print("RETURN",location+"/"+stegoname)
+
+    return location + "/" + stegoname
+    '''
+    full_name = cover_img_path.split("\\")[-1]
+    name = full_name.split(".")[0]
+    steg_name = name + "_steg." + img_type
+    dirname = os.path.dirname(cover_img_path)
+    filename = os.path.join(dirname)
+    return filename +"\\" +steg_name
+    '''
+
+'''
+import os
+file_location = '/srv/volume1/data/eds/eds_report.csv'
+file_name = os.path.basename(file_location )  #eds_report.csv
+location = os.path.dirname(file_location )    #/srv/volume1/data/eds
+
+f you want to convert a list to a string, consider using "".join(mylist).
+'''
 
 # same as the above, but append _crop to the image name
 def crop_path_generator(img_path: str, img_type: str):
@@ -76,8 +102,7 @@ def text_from_bits_int(bits: list):
     string_bits = [str(i) for i in bits[16:message_len+16]]
     string_concat = ""
     # concatenate each element to one string
-    for string in string_bits:
-        string_concat += string
+    string_concat = "".join(string_bits)
     string_decode = text_from_bits(string_concat)
     return string_decode, message_len
 
@@ -110,21 +135,18 @@ def create_FFTmask(columns, rows, message_digital) -> tuple:
     global optcut
     # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
     cut = np.sqrt(2*len(message_digital)/(rows*columns))*1.03
-    if cut > 0.7:
+    if cut > max_cut:
         raise Exception("The message is too large. Major distortions are to be expected.")
-    if not optcut:
-        if cut > 0.4:
-            raise Exception("The message is too large. Major distortions are to be expected.")
-        else:
-            cut = 0.4
+    elif not optcut:
+        cut = max_cut
 
     #cut off high frequencies from R channel
-    mask = np.full((rows, columns), True)
-    row_start = round(rows/2*(1-cut))
-    row_stop = round(rows/2*(1+cut))
-    col_start = round(columns/2*(1-cut))
-    col_stop = round(columns/2*(1+cut))
-    mask[int(row_start):int(row_stop), int(col_start):int(col_stop)] = False  # rectangular
+    mask = np.full((rows, columns), False)
+    row_start = np.around(rows/2*(1-cut), decimals=0).astype(np.uint16)
+    row_stop =  np.around(rows/2*(1+cut), decimals=0).astype(np.uint16)
+    col_start = np.around(columns/2*(1-cut), decimals=0).astype(np.uint16)
+    col_stop =  np.around(columns/2*(1+cut), decimals=0).astype(np.uint16)
+    mask[row_start:row_stop, col_start:col_stop] = True  # rectangular
 
     return mask, cut
 
@@ -133,50 +155,29 @@ def create_FFTmask(columns, rows, message_digital) -> tuple:
 def embedBin2FFT(cover_channel, mask, message_digital):
     fft = np.fft.fft2(cover_channel)
     fft_abs = np.abs(fft)
-    rows, cols = fft_abs.shape
     
-    # cache message length
     message_len = len(message_digital)
-    counter=0
-    for i in range(rows):
-        # if cover_rows == 50:
-        #     print("max values", np.max(cover_r_fft_abs[i]))
-        for j in range(cols):
-            # write where coefficients are zero -> previously filtered out.
-            if mask[i,j]==0:
-                if counter==message_len:
-                    break
-                # write hidden message inside absolute part by overwriting coefficients where the mask is 0
-                fft_abs[i,j]=message_digital[counter]
-                # print(cover_r_fft_abs[i,j])
-                counter+=1
 
-    # # mirror reverse loop
-    # counter = 0
-    # for i in range(cover_rows-1, -1, -1):
-    #     for j in range(cover_cols-1, -1, -1):
-    #         if cover_r_fft_mask[i,j]==0:
-    #             if counter < len(bin_encoded):
-    #                 cover_r_fft_abs[i,j]=bin_encoded[counter]
-    #                 counter+=1
-
+    masked_fft = fft_abs[mask]
+    for ii in range(message_len):
+        masked_fft[ii] = message_digital[ii]
+    fft_abs[mask] = masked_fft
+    
     #IFFT on single channel. Take filtered absolute and inverse with original phase, imaginary part should be negligable
-    cover_masked = np.fft.ifft2(fft_abs*np.exp(1j*np.angle(fft))).real
-    # print(cover_r_masked)
+    cover_masked = np.fft.ifft2(np.multiply(fft_abs, np.exp(np.multiply(1j, np.angle(fft))))).real
     return cover_masked
 
 
 # calculate and return mask, default cut = 0.4
 def calculate_FFTmask(columns, rows, cut = None):
     if not cut:
-        cut = 0.4
-    stego_fft_mask = np.full((rows, columns), True)
-    mask = np.full((rows, columns), True)
-    row_start = round(rows/2*(1-cut))
-    row_stop = round(rows/2*(1+cut))
-    col_start = round(columns/2*(1-cut))
-    col_stop = round(columns/2*(1+cut))
-    stego_fft_mask[int(row_start):int(row_stop),int(col_start):int(col_stop)] = False  # rectangular
+        cut = max_cut
+    stego_fft_mask = np.full((rows, columns), False)
+    row_start = np.around(rows/2*(1-cut), decimals=0).astype(np.uint16)
+    row_stop =  np.around(rows/2*(1+cut), decimals=0).astype(np.uint16)
+    col_start = np.around(columns/2*(1-cut), decimals=0).astype(np.uint16)
+    col_stop =  np.around(columns/2*(1+cut), decimals=0).astype(np.uint16)
+    stego_fft_mask[row_start:row_stop, col_start:col_stop] = True  # rectangular
 
     return stego_fft_mask
 
@@ -184,22 +185,17 @@ def calculate_FFTmask(columns, rows, cut = None):
 # returns a list with analog values (int), by shifting the channel into the frequency domain and looking at every pixel where the mask is 0
 def get_message(stego_channel, mask) -> list:
     # transform R channel into frequency domain
-    stego_r_fft =np.fft.fft2(stego_channel)
-    stego_r_fft_abs = np.abs(stego_r_fft)
-    rows, cols = stego_r_fft_abs.shape
+    stego_fft =np.fft.fft2(stego_channel)
+    stego_fft_abs = np.abs(stego_fft)
 
-    # calculate message length from mask
-    message_length = int(np.count_nonzero(mask == False)//2)
-
+    # calculate message length from mask -> predicted message length > true message length!
+    message_length = int(np.count_nonzero(mask == True)//2)
+    # create message buffer
     message_analog=np.zeros(message_length, dtype='uint32')
-    counter=0
-    for i in range(rows):
-        for j in range(cols):
-            if mask[i,j]==0:
-                if counter==message_length:
-                    break
-                message_analog[counter] = stego_r_fft_abs[i,j]
-                counter+=1 
+    
+    stego_fft_masked = stego_fft_abs[mask]
+    for ii in range(message_length):
+        message_analog[ii] = stego_fft_masked[ii]
 
     return message_analog
 
@@ -209,6 +205,10 @@ cover_img_path = ""
 stego_img_path = ""
 optcut = None
 message = ""
+colorspace = ""
+max_cut = 0.4
+max_row = 900
+max_col = 1600
 
 # image path setter
 def set_img_path(cover_path, stego_path):
@@ -230,6 +230,52 @@ def set_message(string):
     global message
     message = string
 
+# set the colorspace according to the colorspace map below
+def set_colorspace(string: str):
+    global colorspace
+    colorspace = string
+
+# manually increase the maximum cutout of the mask
+def set_maxcut(cut: float):
+    global max_cut
+    max_cut = cut
+
+# manually set resize size
+def set_resize_max(row: int, col: int):
+    global max_row
+    global max_col
+    max_row = row
+    max_col = col
+
+# resize image if too large (>1600/900) and return Pillow Image object (not stored yet)
+def resize(cover_img_path: str) -> Image:
+    image = Image.open(cover_img_path)
+    # get real size
+    cols, rows = image.size
+
+    # handle exception first
+    if (cols < max_col) and (rows < max_row):
+        return image
+
+    # calculate aspect ratio
+    ratio = cols/rows
+
+    # check if either dimension is greater than 1600:900
+    if ratio >= max_col/max_row:
+        # resize columns to max (1600) and adjust rows accordingly
+        if cols > max_col:
+            new_cols = max_col
+            new_rows = new_cols//ratio
+    else:
+        # resize rows to max (900) and adjust columns accordingly
+        if rows > max_row:
+            new_rows = max_row
+            new_cols = np.round(new_rows*ratio, decimals=0)
+
+    im_resize = image.resize((int(round(new_cols)), int(round(new_rows))))
+    return im_resize
+    
+
 # encodes string into abs fft of the image previously declared with set_img_path().
 # encoding happens with a specific gain and cut value
 # the default cut value is 0.4, but an option for optcut can be passed and an optimal cut value will be calculated, which has to be passed to the receiver later on.
@@ -237,35 +283,48 @@ def steg_encode(gain: int) -> float:
     global message
     global cover_img_path
     global stego_img_path
+    global colorspace
+
+    #image = resize(cover_img_path).convert(colorspace)
+
+    #image =Image.open(cover_img_path)
+    #image.load()
+
+    resizeImage=False
+
+    if resizeImage == True:
+        image = resize(cover_img_path).convert(colorspace)
+    else:
+        image =Image.open(cover_img_path)
+        image.load()
+
+
+
+    # image = convert_colorspace(image, 0, colorspace)
+    channel0, channel1, channel2 = image.split() #split image into its 3 channels
+
      # convert utf-8 to binary with 2 bytes prepended for telling length of message
     bin_encoded =  text_to_bits_int(message, gain)
 
-    image = Image.open(cover_img_path)
-    # image.load()
-
-    Rot, Grün, Blau= image.split() #split image into its RGB channels
-
     # create rectangular fft mask
-    cover_r_fft_mask, cut = create_FFTmask(*(image.size), bin_encoded)
-
-    # cover_r_fft_masked = np.abs(np.fft.fft2(Rot))*cover_r_fft_mask
+    cover_fft_mask, cut = create_FFTmask(*(image.size), bin_encoded)
 
     # calculate channel with embedded binary data in frequency domain and reverse fft
-    cover_r_masked = embedBin2FFT(Rot, cover_r_fft_mask, bin_encoded)
+    cover_masked = embedBin2FFT(channel1, cover_fft_mask, bin_encoded)
 
     # normalize output
-    cover_r_masked_norm = np.clip(cover_r_masked, 0,255)
+    cover_masked_norm = np.clip(cover_masked, 0,255)
     # cover_r_masked_norm = convert(cover_r_masked, 0,255, np.uint8)
 
     # merge layers
-    stego =  np.stack((cover_r_masked_norm, Grün, Blau), axis=2).astype('uint8')
+    stego =  np.stack((channel0, cover_masked_norm, channel2), axis=2).astype('uint8')
 
     # create steganogram
-    stego_img = Image.fromarray(stego)
+    stego_img = Image.fromarray(stego, mode=colorspace).convert("RGB")
 
-    stego_img.save(stego_img_path)     #save image as png
+    stego_img.save(stego_img_path, format= "png")     #save image as png
 
-    if cut==0.4:
+    if cut==max_cut:
         return None
     return cut
 
@@ -273,13 +332,17 @@ def steg_encode(gain: int) -> float:
 # this can also be passed. default is cut=0.4
 def steg_decode(cut: float=None) -> str:
     global stego_img_path
-    stego_img = Image.open(stego_img_path)
+    global colorspace
+    stego_img = Image.open(stego_img_path).convert(colorspace)
 
-    stego_r, stego_g, stego_b = stego_img.split() #split image into its RGB channels
+    # stego_img = convert_colorspace(stego_img, 0, colorspace)
+    # steg_channel0, steg_channel1, steg_channel2 = stego_img.split() #split image into its 3 channels
+    # works slightly faster
+    steg_channel1 = stego_img.getchannel(1) #split image into its 3 channels
 
     stego_fft_mask = calculate_FFTmask(*(stego_img.size), cut)
 
-    message_analog = get_message(stego_r, stego_fft_mask)
+    message_analog = get_message(steg_channel1, stego_fft_mask)
 
     # calculate threshold
     threshold = np.max(message_analog)/2
@@ -314,14 +377,14 @@ def gain_booster(gain: int=10000):
     while Text != message:
         try:
             Text, cut = search(gain)
-            print("gain\t", gain, "\ttext\t", Text[:10])    
+            print("gain: ", gain, "\ttext: ", Text[:10])    
             if Text != message:
                 prev_gain = gain
                 Text = ""
                 gain *= 2
         # except UnicodeDecodeError as err:
         except ValueError as err:
-            print("gain\t", gain, "\ttext\t", Text[:10])    
+            print("gain: ", gain, "\ttext: ", Text[:10])    
             prev_gain = gain
             Text = ""
             gain *= 2
@@ -348,7 +411,7 @@ def binary_search(low, high, num_recur: int=5) -> float:
             Text = ""
         except ValueError:
             Text = ""
-        print("iteration:", recursive_cnt, "\tgain\t", gain, "\tparsed text:\n", Text[:10])
+        print("recur:", recursive_cnt, "\tgain: ", gain, "\tparsed text: ", Text[:10])
 
         if recursive_cnt == num_recur:
             recursive_cnt = 0
@@ -371,11 +434,13 @@ def binary_search(low, high, num_recur: int=5) -> float:
 
 
 # a simple encoder using the default cut value and not improving the gain
-def steg_encode_simple(cover_img_path: str, string: str, optcut: bool, recursive_cnt: int=0) -> None:
-    stego_img_path= stego_path_generator(cover_img_path,"png")
+def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, recursive_cnt: int=0, colorspace: str="RGB") -> None:
+    stego_img_path = stego_path_generator(cover_img_path, "png")
+    print("IMG PATH",stego_img_path)
     set_img_path(cover_img_path, stego_img_path)
     set_message(string)
     set_optcut(optcut)
+    set_colorspace(colorspace)
     prev_gain, gain = gain_booster()[:2]
     if recursive_cnt>0:
         gain = binary_search(prev_gain, gain, recursive_cnt)
@@ -383,8 +448,10 @@ def steg_encode_simple(cover_img_path: str, string: str, optcut: bool, recursive
     cut = steg_encode(gain)
     return cut
 
-def steg_decode_simple(stego_img_path: str, cut: float=None) -> None:
+# a simple decoder using the optional cut value (secret key) and colorspace
+def steg_decode_simple(stego_img_path: str, cut: float=None, colorspace: str="RGB") -> None:
     set_img_path(cover_img_path, stego_img_path)
+    set_colorspace(colorspace)
     try:
         text = steg_decode(cut)
     except UnicodeDecodeError:
