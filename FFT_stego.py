@@ -303,8 +303,6 @@ def steg_encode(gain: int) -> float:
 
     stego_img.save(stego_img_path)     #save image as png
 
-    if cut==max_cut:
-        return None
     return cut
 
 # decodes the message from the abs fft of the previously passed image (stego). if the steganogram was created with a specific cut value,
@@ -356,14 +354,14 @@ def gain_booster(gain: int=10000) -> tuple:
     while Text != message:
         try:
             Text, cut = search(gain)
-            print("gain: ", gain, "\ttext: ", Text[:10])    
+            #print("gain: ", gain, "\ttext: ", Text[:10])    
             if Text != message:
                 prev_gain = gain
                 Text = ""
                 gain *= 2
         # except UnicodeDecodeError as err:
         except ValueError as err:
-            print("gain: ", gain, "\ttext: ", Text[:10])    
+            #print("gain: ", gain, "\ttext: ", Text[:10])    
             prev_gain = gain
             Text = ""
             gain *= 2
@@ -392,7 +390,7 @@ def binary_search(low, high, num_recur: int=5) -> float:
             Text = ""
         except ValueError:
             Text = ""
-        print("recur:", recursive_cnt, "\tgain: ", gain, "\tparsed text: ", Text[:10])
+        #print("recur:", recursive_cnt, "\tgain: ", gain, "\tparsed text: ", Text[:10])
 
         if recursive_cnt == num_recur:
             recursive_cnt = 0
@@ -401,6 +399,9 @@ def binary_search(low, high, num_recur: int=5) -> float:
             else:
                 return success_gain
 
+        # store first gain (also success gain from boost function)
+        if recursive_cnt==1:
+            success_gain = high
         if Text == message:
             # save last successful gain
             success_gain = gain
@@ -415,18 +416,21 @@ def binary_search(low, high, num_recur: int=5) -> float:
 
 
 # a simple encoder using the default cut value and not improving the gain
-def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, recursive_cnt: int=0, colorspace: str="RGB", resize: bool=False) -> None:
-    stego_img_path = stego_path_generator(cover_img_path, "tif")
+def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, recursive_cnt: int=0, colorspace: str="RGB", resize: bool=False, imagetype: str="png", staticgain: int=None) -> float:
+    stego_img_path = stego_path_generator(cover_img_path, imagetype)
     set_img_path(cover_img_path, stego_img_path)
     set_message(string)
     set_optcut(optcut)
     set_colorspace(colorspace)
     enable_resize(resize)
-    prev_gain, gain = gain_booster()[:2]
-    if recursive_cnt>0:
-        gain = binary_search(prev_gain, gain, recursive_cnt)
-    # overwrite last attempt with successful attempt (takes time, since successful attempt was overwritten)
-    cut = steg_encode(gain)
+    if not staticgain:
+        prev_gain, gain = gain_booster()[:2]
+        if recursive_cnt>0:
+            gain = binary_search(prev_gain, gain, recursive_cnt)
+        # overwrite last attempt with successful attempt (takes time, since successful attempt was overwritten)
+        cut = steg_encode(gain)
+    else:
+        cut = steg_encode(staticgain)
     return cut
 
 # a simple decoder using the optional cut value (secret key) and colorspace
