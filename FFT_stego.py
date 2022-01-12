@@ -117,7 +117,7 @@ def create_FFTmask(columns, rows, message_digital) -> tuple:
     # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
     cut = np.sqrt(2*len(message_digital)/(rows*columns))*1.03
     if cut > max_cut:
-        raise Exception("The message is too large. Major distortions are to be expected.")
+        raise Exception("The message is too large. Try to increase cut or decrease message.")
     elif not optcut:
         cut = max_cut
 
@@ -431,7 +431,8 @@ def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, rec
         cut = steg_encode(gain)
     else:
         cut = steg_encode(staticgain)
-    return cut
+        gain = staticgain
+    return cut, gain
 
 # a simple decoder using the optional cut value (secret key) and colorspace
 def steg_decode_simple(stego_img_path: str, cut: float=None, colorspace: str="RGB") -> None:
