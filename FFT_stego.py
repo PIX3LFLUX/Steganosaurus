@@ -371,48 +371,52 @@ def gain_booster(gain: int=10000) -> tuple:
     return prev_gain, gain, cut
 
 
-recursive_cnt = 0
-success_gain = 0
 # find the best gain with recursion. returns only successful gain
-def binary_search(low, high, num_recur: int=5) -> float:
-    global recursive_cnt
-    global success_gain
-    global success_text
-    global message
-    recursive_cnt += 1
-    
-    if high >= low:
-        gain = low + (high - low)//2
+def gain_optimizer(low, high, num_recur: int=5) -> float:
+    recursive_cnt = 0
+    success_gain = 0
+    def binary_search(low, high, num_recur) -> float:
+        nonlocal recursive_cnt
+        nonlocal success_gain
+        global message
+        recursive_cnt += 1
+        
+        if high >= low:
+            gain = low + (high - low)//2
 
-        try:
-            Text, _ = search(gain)
-        except UnicodeDecodeError:
-            Text = ""
-        except ValueError:
-            Text = ""
-        #print("recur:", recursive_cnt, "\tgain: ", gain, "\tparsed text: ", Text[:10])
+            try:
+                Text, _ = search(gain)
+            except UnicodeDecodeError:
+                Text = ""
+            except ValueError:
+                Text = ""
+            #print("recur:", recursive_cnt, "\tgain: ", gain, "\tparsed text: ", Text[:10])
 
-        if recursive_cnt == num_recur:
-            recursive_cnt = 0
+            # store first gain (also success gain from boost function)
+            if recursive_cnt == 1:
+                success_gain = high
+
+            if recursive_cnt == num_recur:
+                if Text == message:
+                    return gain
+                else:
+                    return success_gain
+
             if Text == message:
-                return gain
+                # save last successful gain
+                success_gain = gain
+                # Search the left half
+                return binary_search(low, gain-1, num_recur)
+                # Search the right half
             else:
-                return success_gain
+                return binary_search(gain + 1, high, num_recur)
 
-        # store first gain (also success gain from boost function)
-        if recursive_cnt==1:
-            success_gain = high
-        if Text == message:
-            # save last successful gain
-            success_gain = gain
-            # Search the left half
-            return binary_search(low, gain-1, num_recur)
-            # Search the right half
         else:
-            return binary_search(gain + 1, high, num_recur)
-
+            return -1
+    if num_recur > 0: 
+        return binary_search(low, high, num_recur)
     else:
-        return -1
+        return high
 
 
 # a simple encoder using the default cut value and not improving the gain
@@ -425,8 +429,9 @@ def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, rec
     enable_resize(resize)
     if not staticgain:
         prev_gain, gain = gain_booster()[:2]
-        if recursive_cnt>0:
-            gain = binary_search(prev_gain, gain, recursive_cnt)
+        # if recursive_cnt>0:
+        # gain = binary_search(prev_gain, gain, recursive_cnt)
+        gain = gain_optimizer(prev_gain, gain, recursive_cnt)
         # overwrite last attempt with successful attempt (takes time, since successful attempt was overwritten)
         cut = steg_encode(gain)
     else:
