@@ -114,6 +114,8 @@ def message2bin(message_analog, threshold) -> list:
 # create the mask for the absolute fft by either using the default cut or calculating the optimal with the length of the message
 def create_FFTmask(columns, rows, message_digital) -> tuple:
     global optcut
+    global max_cut
+
     # calculate minimum part to be cut and add another 3% because of rounding errors and for "safety"
     cut = np.sqrt(2*len(message_digital)/(rows*columns))*1.03
     if cut > max_cut:
@@ -123,10 +125,10 @@ def create_FFTmask(columns, rows, message_digital) -> tuple:
 
     #cut off high frequencies from R channel
     mask = np.full((rows, columns), False)
-    row_start = np.around(rows/2*(1-cut), decimals=0).astype(np.uint16)
-    row_stop =  np.around(rows/2*(1+cut), decimals=0).astype(np.uint16)
-    col_start = np.around(columns/2*(1-cut), decimals=0).astype(np.uint16)
-    col_stop =  np.around(columns/2*(1+cut), decimals=0).astype(np.uint16)
+    row_start = np.around(rows/2 * (1.0-cut), decimals=0).astype(np.uint16)
+    row_stop =  np.around(rows/2 * (1.0+cut), decimals=0).astype(np.uint16)
+    col_start = np.around(columns/2 * (1.0-cut), decimals=0).astype(np.uint16)
+    col_stop =  np.around(columns/2 * (1.0+cut), decimals=0).astype(np.uint16)
     mask[row_start:row_stop, col_start:col_stop] = True  # rectangular
 
     return mask, cut
@@ -149,15 +151,16 @@ def embedBin2FFT(cover_channel, mask, message_digital):
     return cover_masked
 
 
-# calculate and return mask, default cut = 0.4
-def calculate_FFTmask(columns, rows, cut = None):
+# calculate and return mask, default cut set with set_maxcut()
+def calculate_FFTmask(columns, rows, cut: float=None):
     if not cut:
+        global max_cut
         cut = max_cut
     stego_fft_mask = np.full((rows, columns), False)
-    row_start = np.around(rows/2*(1-cut), decimals=0).astype(np.uint16)
-    row_stop =  np.around(rows/2*(1+cut), decimals=0).astype(np.uint16)
-    col_start = np.around(columns/2*(1-cut), decimals=0).astype(np.uint16)
-    col_stop =  np.around(columns/2*(1+cut), decimals=0).astype(np.uint16)
+    row_start = np.around(rows/2 * (1.0-cut), decimals=0).astype(np.uint16)
+    row_stop =  np.around(rows/2 * (1.0+cut), decimals=0).astype(np.uint16)
+    col_start = np.around(columns/2 * (1.0-cut), decimals=0).astype(np.uint16)
+    col_stop =  np.around(columns/2 * (1.0+cut), decimals=0).astype(np.uint16)
     stego_fft_mask[row_start:row_stop, col_start:col_stop] = True  # rectangular
 
     return stego_fft_mask
@@ -261,6 +264,28 @@ def resize(cover_img_path: str) -> Image:
     im_resize = image.resize((int(np.around(new_cols, decimals=0)), int(np.around(new_rows, decimals=0))))
     return im_resize
 
+# calculate threshold
+def threshold_otsu(array) -> int:
+    max = np.max(array)
+    [hist, _] = np.histogram(array, bins=max)
+    # Normalization so we have probabilities-like values (sum=1)
+    hist = 1.0*hist/np.sum(hist)
+
+    val_max = -999
+    thr = -1
+    for t in range(1,max):
+        # create both classes
+        q1 = np.sum(hist[:t])
+        q2 = np.sum(hist[t:])
+        # calculate mean
+        m1 = np.sum(np.array([i for i in range(t)])*hist[:t])/q1
+        m2 = np.sum(np.array([i for i in range(t,max)])*hist[t:])/q2
+        # calculate variance
+        val = q1*(1-q1)*np.power(m1-m2,2)
+        if val_max < val:
+            val_max = val
+            thr = t
+    return thr
 
 # encodes string into abs fft of the image previously declared with set_img_path().
 # encoding happens with a specific gain and cut value
@@ -323,6 +348,7 @@ def steg_decode(cut: float=None) -> str:
 
     # calculate threshold
     threshold = np.max(message_analog)/2
+    # threshold = threshold_otsu(message_analog)
 
     # convert message values to binary
     binary = message2bin(message_analog, threshold)
@@ -420,7 +446,7 @@ def gain_optimizer(low, high, num_recur: int=5) -> float:
 
 
 # a simple encoder using the default cut value and not improving the gain
-def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, recursive_cnt: int=0, colorspace: str="RGB", resize: bool=False, imagetype: str="png", staticgain: int=None) -> float:
+def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, recursive_cnt: int=0, colorspace: str="RGB", resize: bool=False, imagetype: str="png", staticgain: int=None) -> tuple:
     stego_img_path = stego_path_generator(cover_img_path, imagetype)
     set_img_path(cover_img_path, stego_img_path)
     set_message(string)
@@ -440,7 +466,7 @@ def steg_encode_simple(cover_img_path: str, string: str, optcut: bool=False, rec
     return cut, gain
 
 # a simple decoder using the optional cut value (secret key) and colorspace
-def steg_decode_simple(stego_img_path: str, cut: float=None, colorspace: str="RGB") -> None:
+def steg_decode_simple(stego_img_path: str, cut: float=None, colorspace: str="RGB") -> str:
     set_img_path(cover_img_path, stego_img_path)
     set_colorspace(colorspace)
     try:
