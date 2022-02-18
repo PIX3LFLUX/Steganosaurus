@@ -1,4 +1,5 @@
 """ string version """
+from re import I
 import numpy as np
 from PIL import Image
 import os
@@ -6,11 +7,23 @@ import configparser
 
 from time import perf_counter
 
+from enum import Enum
+
+class Colorspace(Enum):
+    RGB = 0
+    YCbCr = 1
+
+class ImageType(Enum):
+    png = 0
+    tif = 1
+    webp = 2
+
+
 # generates the path for the stego image from the name of the cover image and the path the current python file resides on
-def stego_path_generator(cover_img_path: str, img_type: int):
+def stego_path_generator(cover_img_path: str, img_type: ImageType):
     full_name = str(os.path.basename(cover_img_path))
     name = full_name.rsplit(".", maxsplit=1)[0]
-    steg_name = name + "_steg." + image_type_dict[img_type]
+    steg_name = name + "_steg." + img_type.name
     cwdname = os.getcwd()
     if not os.path.exists(cwdname + "\\Steganograms"):
         os.mkdir(os.path.join(cwdname, "Steganograms"))
@@ -18,28 +31,28 @@ def stego_path_generator(cover_img_path: str, img_type: int):
     return os.path.join(filedir, steg_name)
 
 # same as the above, but append _crop to the image name
-def crop_path_generator(img_path: str, img_type: int):
+def crop_path_generator(img_path: str, img_type: ImageType):
     full_name = img_path.split("\\")[-1]
     name = full_name.split(".")[0]
-    steg_name = name + "_crop." + image_type_dict[img_type]
+    steg_name = name + "_crop." + img_type.name
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
     return filename + steg_name
 
 # same as the above, but append _crop to the image name
-def resize_path_generator(img_path: str, img_type: int):
+def resize_path_generator(img_path: str, img_type: ImageType):
     full_name = img_path.split("\\")[-1]
     name = full_name.split(".")[0]
-    steg_name = name + "_resize." + image_type_dict[img_type]
+    steg_name = name + "_resize." + img_type.name
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
     return filename + steg_name
 
 # same as the above, but append _crop to the image name
-def rotate_path_generator(img_path: str, img_type: int):
+def rotate_path_generator(img_path: str, img_type: ImageType):
     full_name = img_path.split("\\")[-1]
     name = full_name.split(".")[0]
-    steg_name = name + "_rotate." + image_type_dict[img_type]
+    steg_name = name + "_rotate." + img_type.name
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'ImageSources\\Steganograms\\')
     return filename + steg_name
@@ -186,8 +199,6 @@ def get_message(stego_channel, mask) -> list:
 
 # ------------------------------------------------------------------------------------------------------------
 # some global variables
-colorspace_dict = { 0:"RGB", 1: "YCbCr"}
-image_type_dict = { 0:"png", 1:"tiff", 2: "webp"}
 cover_img_path = ""
 stego_img_path = ""
 message = ""
@@ -212,36 +223,6 @@ def set_img_path(cover_path, stego_path):
 def set_message(string):
     global message
     message = string
-
-# enable optimal cut
-# def set_optcut(enable: bool):
-#     global optcut
-#     if enable:
-#         optcut = True
-#     else:
-#         optcut = False
-
-
-# set the colorspace according to the colorspace map below
-# def set_colorspace(string: str):
-#     global colorspace
-#     colorspace = string
-
-# manually increase the maximum cutout of the mask
-# def set_maxcut(cut: float):
-#     global max_cut
-#     max_cut = cut
-
-# manually set resize size
-# def set_resize_max(row: int, col: int):
-#     global max_row
-#     global max_col
-#     max_row = row
-#     max_col = col
-
-# def enable_resize(enable: bool):
-#     global resize_enable
-#     resize_enable = enable
 
 # resize image if too large (>1600/900) and return Pillow Image object (not stored yet)
 def resize(cover_img_path: str) -> Image:
@@ -309,7 +290,8 @@ def steg_encode(gain: int) -> float:
     else:
         image = Image.open(cover_img_path)
     
-    image.convert(colorspace_dict[colorspace])
+    # image.convert(colorspace_dict[colorspace])
+    image = image.convert(Colorspace(colorspace).name)
 
     # image = convert_colorspace(image, 0, colorspace)
     channel0, channel1, channel2 = image.split() #split image into its 3 channels
@@ -331,7 +313,7 @@ def steg_encode(gain: int) -> float:
     stego =  np.stack((channel0, cover_masked_norm, channel2), axis=2).astype('uint8')
 
     # create steganogram
-    stego_img = Image.fromarray(stego, mode=colorspace_dict[colorspace]).convert("RGB")
+    stego_img = Image.fromarray(stego, mode=Colorspace(colorspace).name).convert("RGB")
 
     stego_img.save(stego_img_path)     #save image as png
 
@@ -342,7 +324,7 @@ def steg_encode(gain: int) -> float:
 def steg_decode(cut: float=None) -> str:
     global stego_img_path
     global colorspace
-    stego_img = Image.open(stego_img_path).convert(colorspace_dict[colorspace])
+    stego_img = Image.open(stego_img_path).convert(Colorspace(colorspace).name)
 
     # stego_img = convert_colorspace(stego_img, 0, colorspace)
     # steg_channel0, steg_channel1, steg_channel2 = stego_img.split() #split image into its 3 channels
@@ -379,7 +361,6 @@ def search(gain: float) -> tuple:
 
 # doubles gain until one encoding and decoding process succeeds. returns gain and previous gain
 def gain_booster(gain: int=10000) -> tuple:
-    global message
     prev_gain = 0
 
     # reset text
@@ -454,7 +435,7 @@ def gain_optimizer(low, high, num_recur: int=5) -> float:
 
 # a simple encoder using the default cut value and not improving the gain
 def steg_encode_simple(cover_img_path: str, string: str) -> tuple:
-    stego_img_path = stego_path_generator(cover_img_path, image_type)
+    stego_img_path = stego_path_generator(cover_img_path, ImageType(image_type))
     set_img_path(cover_img_path, stego_img_path)
     set_message(string)
     if static_gain == 0:
@@ -470,11 +451,11 @@ def steg_encode_simple(cover_img_path: str, string: str) -> tuple:
     return cut, gain
 
 # a simple decoder using the optional cut value (secret key) and colorspace
-def steg_decode_simple(stego_img_path: str, cut: float=None, colorspace: int=0) -> str:
+def steg_decode_simple(stego_img_path: str, cut: float=None, colorspace: Colorspace=Colorspace.RGB) -> str:
 
     set_img_path(cover_img_path, stego_img_path)
     # set_colorspace(colorspace)
-    set_settings(colorspace_=colorspace_dict[colorspace])
+    set_settings(colorspace_=colorspace)
     try:
         text = steg_decode(cut)
     except UnicodeDecodeError:
@@ -553,7 +534,7 @@ def reset_settings():
     return
 
 
-def set_settings(optcut_: bool=False, colorspace_: int=0, max_cut_: float=0.4, max_row_: int=900, max_col_: int=1600, resize_enable_: bool=False, recursive_count_: int=0, image_type_: int=0, static_gain_: int=0):
+def set_settings(optcut_: bool=False, colorspace_: Colorspace=Colorspace.RGB, max_cut_: float=0.4, max_row_: int=900, max_col_: int=1600, resize_enable_: bool=False, recursive_count_: int=0, image_type_: ImageType=ImageType.png, static_gain_: int=0):
     config = configparser.ConfigParser()
     config.read('settings.ini')
 
@@ -561,9 +542,9 @@ def set_settings(optcut_: bool=False, colorspace_: int=0, max_cut_: float=0.4, m
     global optcut
     optcut = optcut_
 
-    config["USER"]["colorspace"] = str(colorspace_)
+    config["USER"]["colorspace"] = str(colorspace_.value)
     global colorspace
-    colorspace = colorspace_
+    colorspace = colorspace_.value
 
     config["USER"]["max_cut"] = str(max_cut_)
     global max_cut
@@ -585,9 +566,9 @@ def set_settings(optcut_: bool=False, colorspace_: int=0, max_cut_: float=0.4, m
     global recursive_count
     recursive_count = recursive_count_
     
-    config["USER"]["image_type"] = str(image_type_)
+    config["USER"]["image_type"] = str(image_type_.value)
     global image_type
-    image_type = image_type_
+    image_type = image_type_.value
 
     config["USER"]["static_gain"] = str(static_gain_)
     global static_gain
