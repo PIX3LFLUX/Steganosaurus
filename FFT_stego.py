@@ -549,7 +549,8 @@ def gain_optimizer(low: list, high: list, num_recur: int) -> list:
                     new_low[ix] = gain[ix]+1
                     new_high[ix] = high[ix]
             return binary_search(new_low, new_high, num_recur)
-        return -1
+        print(f"found best gain after {recursive_cnt} tries.")
+        return success_gain
     if num_recur > 0: 
         return binary_search(low, high, num_recur)
     return high
@@ -564,7 +565,7 @@ def steg_encode_simple(cover_img_path: str, string: str) -> tuple:
         if Colorspace(colorspace) == Colorspace.RGB:
             prev_gain, gain, cut = gain_booster([10000]*3)
         elif Colorspace(colorspace) == Colorspace.YCbCr:
-            prev_gain, gain, cut = gain_booster([1000]*2)
+            prev_gain, gain, cut = gain_booster([10000]*2)
 
         if recursive_count > 0:
             gain = gain_optimizer(prev_gain, gain, recursive_count)
