@@ -574,6 +574,7 @@ def steg_encode_simple(cover_img_path: str, string: str) -> tuple:
     elif static_gain > 0:
         cut = steg_encode(static_gain)[0]
         gain = static_gain
+    print("embeding of secret message complete: " + stego_img_path)
     return cut, gain
 
 
