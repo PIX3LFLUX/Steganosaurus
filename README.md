@@ -25,6 +25,12 @@ The code written is not by any means what you would consider *professional*. We 
   - [1. Encoding](#1-encoding)
   - [2. Decoding](#2-decoding)
   - [What we improved](#what-we-improved)
+  - [Tests](#tests)
+    - [Measurement instruments](#measurement-instruments)
+    - [resize](#resize)
+    - [payload](#payload)
+    - [gain optimization](#gain-optimization)
+    - [cut](#cut)
 - [Frontend: What you see](#frontend-what-you-see)
 - [Settings](#settings)
   - [Default values](#default-values)
@@ -209,6 +215,7 @@ To reduce the effect of the hidden message to the cover image, we improved upon 
 <br>
 
 * Introduced *gain optimization*. With `recursive_count` the level of optimization can be adjusted.
+* Before the gain can be optimized, a gain has to be found at which the decoding process succeeds. This is achieved by the `gain_booster()` function, which doubles the previous gain each time the decoding process fails.
 * Calculate gain for each channel *individually*.
 > **Gain optimization from 10000 to around 3000. `recursive_count` was set over 14. RGB color space (3 channels)**  
 > ![image33](/ImageSources/documentation/gain_booster.jpeg)  
@@ -217,17 +224,91 @@ To reduce the effect of the hidden message to the cover image, we improved upon 
 > ![image35](/ImageSources/documentation/FFT_Red_gain10000.png)  
 > **Absolute FFT red channel with `gain=2500`**  
 > ![image36](/ImageSources/documentation/FFT_Red_gain2500.png)  
-> **Mean Square Error (MSE) and Structure Similarity Index Measure (SSIM) of red channel**  
-> ![image37](/ImageSources/documentation/Diagram_gainOptimizer.png)  
-> MSE -> Lower = Better, min = 0  
-> SSIM -> Higher = Better, max = 1, min = 0
+> More reference on [gain optimization](#gain-optimization).  
+
+It is worth noting, that the benefit of gain optimization not only depends on the iterations, but also on the cover image itself.
+Prior tests have also shown that more than 5 iterations is often unnecessary and a reasonable improvement can already be achieved at 3 iterations.
+
+<br>
+<br>
+
+## Tests
+
+<br>
+
+To confirm our improvements were working, we conducted some simple tests:
+
+| test              |             description              |                                                            expectation                                                            |
+| :---------------- | :----------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------: |
+| resize            | Changing the size of the cover image |                           A bigger cover image size should decrease the impact of the constant payload                            |
+| payload           |          Increasing payload          |                       A bigger payload means more info to store, which means more impact on the cover image                       |
+| gain optimization |       Reducing/Improving gain        |                                        A better gain means less impact on the cover image                                         |
+| cut               |         Increasing mask size         | Since we are embedding from the top left corner, the message will be embedded closer to the lower frequencies if cut is increased |
+
+To measure the differences between the cover and stego image, we choose two "generic" approaches and a more sophisticated one, PSNR & MSE being the simple ones, and SSIM the more complicated.
+
+<br>
+
+### Measurement instruments
+
+| acronym | full name                          | description                                                                                                 | formula | range(worst -> best) |
+| :------ | :--------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------ | :---- |
+| MSE     | Mean Square Error                  | Sum of squared differences per pixel                                                                        ||    inf -> 0     |
+| PSNR    | Peak Signal to Noise Ratio         | A logarithmic way of displaying MSE                                                                         |  |   0 -> inf    |
+| SSIM    | Structure Similarity Index Measure | Takes a relative approach by using the statistical properties of the images. Better resembles human vision. ||    0 -> 1     |
 
 
+### resize
+
+
+<!-- ![image41](ImageSources/documentation/resize_test.png) -->
+<figure>
+<img src="ImageSources/documentation/resize_test.png" width="1000" height="600">
+<figcaption>Image size test on <i>mandril_color.tif</i> .Constant gain, constant cut.</figcaption>
+</figure>
+The test shows a steep decrease in MSE and increase in SSIM as the cover image size goes up. The results show an exponential correlation between image size and time to process. The results are as expected.
+
+<br>
+<br>
+
+### payload
+
+<!-- ![image42](ImageSources/documentation/lena_payload.png) -->
+<figure>
+<img src="ImageSources/documentation/lena_payload.png" width="1000" height="600">
+<figcaption>Payload test on <i>lena_color_512.tif</i>. Optimized gain, optimized cut.</figcaption>
+</figure>
+As the payload increases, the mask size also increases. Therefore the time to process will be higher. And more information is stored, the stronger is the impact on the cover image, which can be derived from the sinking SSIM and PSNR. Results are as expected.
+<br>
+<br>
+
+### gain optimization
+
+<!-- ![image43](ImageSources/documentation/Diagram_gainOptimizer.png) -->
+<figure>
+<img src="ImageSources/documentation/Diagram_gainOptimizer.png" width="1000" height="600">
+<figcaption>Gain optimization test on <i>lena_color_256.tif</i>. Constant payload, constant cut.</figcaption>
+</figure>
+When optimizing the gain, the first iterations contribute the most to cover image integrity. After the 5. iteration, the improvements are negligable as the SSIM and MSE converge.
+<br>
+<br>
+
+### cut
+
+<!-- ![image44](ImageSources/documentation/cut_test.png) -->
+<figure>
+<img src="ImageSources/documentation/cut_test.png" width="1000" height="600">
+<figcaption>Cut test on <i>mandril_color.tif</i>. Constant payload, constant gain.</figcaption>
+</figure>
+This test did not work as expected. By increasing the cut and therefore the mask size, more information is embedded into the lower frequencies, which contribute more to the image as their amplitude is not only higher, but they are also much more noticeable to the human eye. (This trait is often used in image compression). Nevertheless, the test showed positive results towards increase in mask size, but rapidly changes momentum as full image size is reached. This test perfectly shows the difference between the capabilities of some measurement instruments in image processing and how important it is to include multiple measurement approaches (like SSIM, although it also did not perform so well). Even though SSIM is supposed to mimic how humans perceive images, it still failed at evaluating the more noticeable difference in lower frequencies.
+<br>
 <br>
 <br>
 
 # Frontend: What you see
 
+<br>
+<br>
 <br>
 
 
