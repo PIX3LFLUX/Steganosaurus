@@ -46,7 +46,7 @@ The discrete Fourier transform (short: DFT) converts the image from the spatial 
 However, you need to keep in mind that the resulting image is ***complex*** in the frequency domain, which means that after calculating the absolute and angle, you are left with **two planes**. The angle plane, also called the *phase*, has information about the relative location of the frequencies, whereas the absolute plane has information about their magnitude, also called *magnitude spectrum*.  When hiding information inside these planes, it is recommended to use the magnitude spectrum, since we mostly want to keep the image and its original proportions intact. Which is why we only used the magnitude spectrum.
 The DFT as an algorithm can be broken down into smaller DFTs and their counterparts, which makes the then so called fast Fourier transform (FFT) an n*O(log(n)) algorithm.
 
-![image999](/Steganography/ImageSources/documentation/fft_cover_shift.png)
+![image999](/ImageSources/documentation/fft_cover_shift.png)
 
 
 ## Our approach
@@ -88,9 +88,9 @@ Setting and/or getting the settings is performed via `set_settings()` and `load_
 Splitting the image depends on the color space set, which can be simple `RGB` or `YCbCr`.  
 
 > **RGB**  
->![image10](/Steganography/ImageSources/documentation/channel_split_RGB.png)  
+>![image10](/ImageSources/documentation/channel_split_RGB.png)  
 > **YCbCr**  
-> ![image11](/Steganography/ImageSources/documentation/channel_split_YCbCr.png)  
+> ![image11](/ImageSources/documentation/channel_split_YCbCr.png)  
 <br>
 
 ***3. Create header***  
@@ -107,33 +107,33 @@ The returned value **has to be sent to the receiver**, or he can not know at whi
 <br>
 
 > **Red channel with default cut: 0.4**  
-> ![image12](/Steganography/ImageSources/documentation/fft_mask0.png)  
+> ![image12](/ImageSources/documentation/fft_mask0.png)  
 
 <br>
 
 ***6. Embed into masked FFT***  
 The now binary message simply replaces the current values of the FFT, in range of the mask. Embedding is only used on the top half, since after the inverse Fourier transform the top half will be mirrored to the bottom half either way.    
 > **FFT of red channel with default cut**  
-> ![image13](/Steganography/ImageSources/documentation/red_fft_after_embed0.png)
+> ![image13](/ImageSources/documentation/red_fft_after_embed0.png)
   
 <br>
 
 ***7. Reverse the FFT and stitch the split image back together***  
 Calculating the inverse Fourier transform means mirroring the upper part of the FFT to the lower part, by which also the previously applied gain is halved.  
 > **FFT of green channel with default cut and gain of 10000**  
-> ![image14](/Steganography/ImageSources/documentation/green_fft_embed_ifft0.png)  
+> ![image14](/ImageSources/documentation/green_fft_embed_ifft0.png)  
 
 <br>
 
 > **FFT of green channel with default cut and gain of 10000 as height plot**  
-> ![image15](/Steganography/ImageSources/documentation/green_fft_embed_ifft_height0.png)  
+> ![image15](/ImageSources/documentation/green_fft_embed_ifft_height0.png)  
 
 <br>
 
 ***8. Store***  
 > **Stego image (left) and original image (right)**  
-> ![image16](/Steganography/ImageSources/documentation/stego_RGB.png)
-> ![image17](/Steganography/ImageSources/documentation/lena_color_256.png)
+> ![image16](/ImageSources/documentation/stego_RGB.png)
+> ![image17](/ImageSources/documentation/lena_color_256.png)
 
 
 <br>
@@ -162,15 +162,15 @@ The mask is calculated from the cut value.
 ***4. Buffer analog values from masked FFT***  
 These values typically range between half of the gain at which the message was embedded and 0.  
 > **Absolute FFt of red channel, zoomed in**  
-> ![image21](/Steganography/ImageSources/documentation/red_fft_decode0.png)
+> ![image21](/ImageSources/documentation/red_fft_decode0.png)
 <br>
 
 ***5. Convert analog message to binary***  
 To convert the analog message to binary a simple threshold is used. An bimodal histogram is to be expected (since we want to decode in binary). The threshold is calculated by dividing the maximum analog value by 2. Experience shows that this works quite well and is especially very fast and therefore useful for optimizing the gain. As stated [here](#problems), distinguishability depends greatly on the image itself and in this case the `YCbCr` colorspaces chromina channels have a much more narrow distribution, which results in a greater distance between `1`s and `0`s of the analog message.
 > **Histogram of analog message, RGB, gain=10000**  
-> ![image22](/Steganography/ImageSources/documentation/decode_hist0.png)  
+> ![image22](/ImageSources/documentation/decode_hist0.png)  
 > **Histogram of analog message, YCbCr, gain=10000**  
-> ![image23](/Steganography/ImageSources/documentation/decode_hist1.png)  
+> ![image23](/ImageSources/documentation/decode_hist1.png)  
 <br>
 
 ***6. Decode header and throw away leftover values***  
@@ -196,29 +196,29 @@ To reduce the effect of the hidden message to the cover image, we improved upon 
 
 * *Decreased mask size* by calculating only the necessary mask from the binary message (`optcut=True`).
 > **Red channel absolute FFT masked with `optcut=False`**  
-> ![image30](/Steganography/ImageSources/documentation/red_fft_after_embed0.png)  
+> ![image30](/ImageSources/documentation/red_fft_after_embed0.png)  
 > **Cr channel absolute FFT masked with `optcut=True`**  
-> ![image31](/Steganography/ImageSources/documentation/Cr_fft_after_embed1.png)
+> ![image31](/ImageSources/documentation/Cr_fft_after_embed1.png)
 
 <br>
 
 * Introduced another color space: *YCbCr*. Message is only stored in the two chromina channels. The `YCbCr` color space allows for a separation of the lumina channel, which contributes greatly to the humans ability of noticing changes/differences. The two chromina channels however contribute much less to the local contrast of the image and are therefore used as carriers for our hidden message.  
 > **Absolute FFT of all 3 channels of stego image in YCbCr color space**  
-> ![image32](/Steganography/ImageSources/documentation/FFT_YCbCr.png)
+> ![image32](/ImageSources/documentation/FFT_YCbCr.png)
 
 <br>
 
 * Introduced *gain optimization*. With `recursive_count` the level of optimization can be adjusted.
 * Calculate gain for each channel *individually*.
 > **Gain optimization from 10000 to around 3000. `recursive_count` was set over 14. RGB color space (3 channels)**  
-> ![image33](/Steganography/ImageSources/documentation/gain_booster.jpeg)  
-> ![image34](/Steganography/ImageSources/documentation/gain_optimizer.jpeg)  
+> ![image33](/ImageSources/documentation/gain_booster.jpeg)  
+> ![image34](/ImageSources/documentation/gain_optimizer.jpeg)  
 > **Absolute FFT red channel with `gain=10000`**  
-> ![image35](/Steganography/ImageSources/documentation/FFT_Red_gain10000.png)  
+> ![image35](/ImageSources/documentation/FFT_Red_gain10000.png)  
 > **Absolute FFT red channel with `gain=2500`**  
-> ![image36](/Steganography/ImageSources/documentation/FFT_Red_gain2500.png)  
+> ![image36](/ImageSources/documentation/FFT_Red_gain2500.png)  
 > **Mean Square Error (MSE) and Structure Similarity Index Measure (SSIM) of red channel**  
-> ![image37](/Steganography/ImageSources/documentation/Diagram_gainOptimizer.png)  
+> ![image37](/ImageSources/documentation/Diagram_gainOptimizer.png)  
 > MSE -> Lower = Better, min = 0  
 > SSIM -> Higher = Better, max = 1, min = 0
 
@@ -310,6 +310,7 @@ Since information is stored in binary, one could apply several solutions from th
 6. Encryption
 7. Optimizing gain even further with local threshold filters instead of global channel threshold (e.g. in the shape of a 3x3 square)
 8. Different masks (circle, diamond, ...)
-9. Support for embedding any type of digital file (.pdf, .zip, .exe, .mp3, ...)
-10. Get rid of the exchange of the `cut` value by storing it symmetrically in the middle of the FFT (constant location).
-11. Use the `np.rfft()`, which is only half of the FT, since half of it is redundant. Saves time.
+9. Different decode starting order (top right, bottom left,...)
+10. Support for embedding any type of digital file (.pdf, .zip, .exe, .mp3, ...)
+11. Get rid of the exchange of the `cut` value by storing it symmetrically in the middle of the FFT (constant location).
+12. Use the `np.rfft()`, which is only half of the FT, since half of it is redundant. Saves time.
