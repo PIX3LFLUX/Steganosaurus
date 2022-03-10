@@ -1,11 +1,46 @@
+<div id="top"></div>
+<!-- The https://github.com/othneildrew/Best-README-Template was used as reference for this Readme -->
+
+<!-- PROJECT SHIELDS -->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![GNU License][license-shield]][license-url]
+
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/github_username/repo_name">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  </a>
+
+<h3 align="center">project_title</h3>
+
+  <p align="center">
+    project_description
+    <br />
+    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    ·
+    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
+  </p>
+</div>
+
 # **Steganosaurus**
 Hide messages inside the Fourier transform of an image and decode them!
 (How would they know?)
 
 <br>
 
+
 # Disclaimer
-This is a project from the University of applied sciences in Karlsruhe, licensed under the GNU license.
+This is a project from the University of applied sciences in Karlsruhe, licensed under the [GNU license](#license).
 The code written is not by any means what you would consider *professional*. We are both students learning the path of programming and have tried our best at keeping the code organized and readable. If there are any improvements to be made, please let us know.
 
 <br>
@@ -21,12 +56,15 @@ The code written is not by any means what you would consider *professional*. We 
   - [Our approach](#our-approach)
   - [What makes the digital approach so great?](#what-makes-the-digital-approach-so-great)
   - [Problems](#problems)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Usage](#usage)
 - [Backend: How it all works](#backend-how-it-all-works)
   - [1. Encoding](#1-encoding)
   - [2. Decoding](#2-decoding)
   - [What we improved](#what-we-improved)
   - [Tests](#tests)
-    - [Measurement instruments](#measurement-instruments)
+    - [measurements](#measurements)
     - [resize](#resize)
     - [payload](#payload)
     - [gain optimization](#gain-optimization)
@@ -36,6 +74,9 @@ The code written is not by any means what you would consider *professional*. We 
   - [Default values](#default-values)
 - [Header](#header)
 - [Possible improvements](#possible-improvements)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
 
 <br>
@@ -45,7 +86,9 @@ The code written is not by any means what you would consider *professional*. We 
 
 ## Goal  
 The goal of this project is to send text messages hidden inside images using the Discrete Fourier Transform (or rather FFT).
-For ease of use and general usability, we decided to pack this program into a python GUI-app, based on the [kivy](https://kivy.org/#home) framework.
+For ease of use and general usability, we decided to pack this program into a python GUI-app, based on the [kivy](https://kivy.org/#home) framework. You can download the latest .apk from [here][release-url].
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ## What is the (fast) Fourier transform?
 The discrete Fourier transform (short: DFT) converts the image from the spatial domain to the frequency domain. It is discrete, because the input (in this case pixels) is quantized and limited. The frequency domain easily reveals frequential properties of the image, which is often used in image file compression. You can imagine the frequency domain with the DFT as another way of depicting the image, with the DFT as its function.  
@@ -53,6 +96,8 @@ However, you need to keep in mind that the resulting image is ***complex*** in t
 The DFT as an algorithm can be broken down into smaller DFTs and their counterparts, which makes the then so called fast Fourier transform (FFT) an n*O(log(n)) algorithm.
 
 ![image999](/ImageSources/documentation/fft_cover_shift.png)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ## Our approach
@@ -62,8 +107,12 @@ Although this looks promising, it has several drawbacks:
 * Payload in the form of text is rather limited, since it requires a pretty high resolution of the hidden image for the letters to be recognizable.
 Therefore we used a digital approach, where we would embed the information in a binary manner into the Fourier transform.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 ## What makes the digital approach so great?
 The benefit over 'conventional' LSB embedding is that the hidden information is much harder for the human eye to see and arguably for computer programs as well, since it was hidden in the frequency domain, which corresponds to subtle changes of color in high frequency parts of the stego image. It is also spread across the whole image, which makes it even harder to detect with the naked eye. Compared to the 'analog' approach, the payload can be much higher without any noticeable disturbance of the carrier image. Theoretically, it also allows for **any digital file** to be hidden inside the image.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Problems
 But this also comes at a cost:
@@ -71,15 +120,44 @@ But this also comes at a cost:
 * Furthermore, no two images are the same, which changes the equivalent in the frequency domain and can make it harder to embed and later decode information.
 * To top it off, storing text or rather any information in a binary manner relies heavily on the 'distinguishability', or *distance between two binary values*. If even one bit is falsly recognized, the whole letter becomes corrupt, and maybe the message can not be read anymore. So it is crucial to embed the hidden message with as much 'weight' (also referred to as 'gain') as possible, since this also correlates with consistency. (A possible [solution](#possible-improvements) to this)
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
+
+<!-- GETTING STARTED -->
+# Getting Started
+
+To *use* this app, you can just head over the [releases][release-url] page and download the latest .apk to your Android device. Make sure **install third-party apps** is enabled. If not, you will find this option under developer options.  
+To *modify and test* you should install the environment mentioned in [prerequisites](#prerequisites) and [usage](#usage).
+
+## Prerequisites
+
+To *modify* you need to install the conda environment by typing:
+  ```sh
+  conda env create -f requirements.yml
+  ```
+The environment name will be *stego-env*.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+<!-- USAGE EXAMPLES -->
+## Usage
+
+After installation of the conda environment open `FFT_stego.ipynb` in your favorite jupyter notebook editor and select `stego-env` as kernel.
+For testing use `FFT_stego_test.ipynb`.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
 
 # Backend: How it all works
 
 The process is divided into two major parts:  
 * **Encoding**: process of embedding binary information into the Fourier-plane
 * **Decoding**: process of reading binary information from the Fourier-plane
-  
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 
 ## 1. Encoding
@@ -141,7 +219,7 @@ Calculating the inverse Fourier transform means mirroring the upper part of the 
 > ![image16](/ImageSources/documentation/stego_RGB.png)
 > ![image17](/ImageSources/documentation/lena_color_256.png)
 
-
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 
@@ -190,6 +268,7 @@ Since the content is spread over two or three channels, it has to be merged befo
 ***8. Decode hidden message***  
 Decode binary message to utf-8. Also works with Emojis.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 
@@ -229,6 +308,7 @@ To reduce the effect of the hidden message to the cover image, we improved upon 
 It is worth noting, that the benefit of gain optimization not only depends on the iterations, but also on the cover image itself.
 Prior tests have also shown that more than 5 iterations is often unnecessary and a reasonable improvement can already be achieved at 3 iterations.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 
@@ -247,9 +327,10 @@ To confirm our improvements were working, we conducted some simple tests:
 
 To measure the differences between the cover and stego image, we choose two "generic" approaches and a more sophisticated one, PSNR & MSE being the simple ones, and SSIM the more complicated.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 
-### Measurement instruments
+### measurements
 
 | acronym | full name                          | description                                                                                                 | formula | range(worst -> best) |
 | :------ | :--------------------------------- | :---------------------------------------------------------------------------------------------------------- | :------ | :---- |
@@ -257,6 +338,7 @@ To measure the differences between the cover and stego image, we choose two "gen
 | PSNR    | Peak Signal to Noise Ratio         | A logarithmic way of displaying MSE                                                                         |  |   0 -> inf    |
 | SSIM    | Structure Similarity Index Measure | Takes a relative approach by using the statistical properties of the images. Better resembles human vision. ||    0 -> 1     |
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ### resize
 
@@ -268,6 +350,7 @@ To measure the differences between the cover and stego image, we choose two "gen
 </figure>
 The test shows a steep decrease in MSE and increase in SSIM as the cover image size goes up. The results show an exponential correlation between image size and time to process. The results are as expected.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 
@@ -279,6 +362,8 @@ The test shows a steep decrease in MSE and increase in SSIM as the cover image s
 <figcaption>Payload test on <i>lena_color_512.tif</i>. Optimized gain, optimized cut.</figcaption>
 </figure>
 As the payload increases, the mask size also increases. Therefore the time to process will be higher. And more information is stored, the stronger is the impact on the cover image, which can be derived from the sinking SSIM and PSNR. Results are as expected.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 
@@ -290,6 +375,8 @@ As the payload increases, the mask size also increases. Therefore the time to pr
 <figcaption>Gain optimization test on <i>lena_color_256.tif</i>. Constant payload, constant cut.</figcaption>
 </figure>
 When optimizing the gain, the first iterations contribute the most to cover image integrity. After the 5. iteration, the improvements are negligable as the SSIM and MSE converge.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 
@@ -301,12 +388,15 @@ When optimizing the gain, the first iterations contribute the most to cover imag
 <figcaption>Cut test on <i>mandril_color.tif</i>. Constant payload, constant gain.</figcaption>
 </figure>
 This test did not work as expected. By increasing the cut and therefore the mask size, more information is embedded into the lower frequencies, which contribute more to the image as their amplitude is not only higher, but they are also much more noticeable to the human eye. (This trait is often used in image compression). Nevertheless, the test showed positive results towards increase in mask size, but rapidly changes momentum as full image size is reached. This test perfectly shows the difference between the capabilities of some measurement instruments in image processing and how important it is to include multiple measurement approaches (like SSIM, although it also did not perform so well). Even though SSIM is supposed to mimic how humans perceive images, it still failed at evaluating the more noticeable difference in lower frequencies.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 <br>
 
 # Frontend: What you see
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 <br>
@@ -329,6 +419,7 @@ Almost all settings are stored inside `settings.ini`
 | recursive_count | int   | specify iterations through `gain_optimizer` (higher -> better, but takes longer) |
 | static_gain     | int   | choose specific *global* gain. Ignores gain optimization. Disabled if 0.         |
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 
 
@@ -348,6 +439,7 @@ Almost all settings are stored inside `settings.ini`
 | recursive_count | 0     |
 | static_gain     | 0     |
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 
@@ -377,6 +469,7 @@ The header looks like this:
 3024 * 4032 * 3 bits = 12 192 768 * 3 bits	= 36 578 304 bits  
 36 578 304 * 40% bits = 14 631 321.6 bits = 1 828 915.2 bytes = **1 828.9 KiBi**
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 <br>
 <br>
 <br>
@@ -395,3 +488,63 @@ Since information is stored in binary, one could apply several solutions from th
 10. Support for embedding any type of digital file (.pdf, .zip, .exe, .mp3, ...)
 11. Get rid of the exchange of the `cut` value by storing it symmetrically in the middle of the FFT (constant location).
 12. Use the `np.rfft()`, which is only half of the FT, since half of it is redundant. Saves time.
+ 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<br>
+<br>
+
+<!-- CONTRIBUTING -->
+# Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<br>
+<br>
+
+<!-- LICENSE -->
+# License
+
+Distributed under the GNU License. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+<br>
+<br>
+
+<!-- CONTACT -->
+# Contact
+
+Maximilian Ketschik -  kema1039@h-ka.de  
+Deniz Braun    -  brde1011@h-ka.de
+
+Project Link: [https://github.com/github_username/repo_name](https://github.com/PIX3LFLUX/Steganosaurus)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
+[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
+[forks-url]: https://github.com/github_username/repo_name/network/members
+[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
+[stars-url]: https://github.com/github_username/repo_name/stargazers
+[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
+[issues-url]: https://github.com/github_username/repo_name/issues
+[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
+[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
+[product-screenshot]: images/screenshot.png
+[release-url]: https://github.com/github_username/repo_name/release
