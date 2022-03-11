@@ -13,10 +13,10 @@ package.domain = app.stego
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,json
+source.include_exts = py,png,jpg,kv,atlas,json,ini
 
 # (list) List of inclusions using pattern matching
-#source.include_patterns = assets/*,images/*.png
+#source.include_patterns = settings.ini
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -36,7 +36,7 @@ version = 1.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy==2.0.0,PIL,numpy,kivymd==0.104.2
+requirements = python3,kivy==2.0.0,PIL,numpy,kivymd==0.104.2,pyjnius
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes

@@ -14,19 +14,23 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.bubble import Bubble, BubbleButton
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDFillRoundFlatButton
+from kivymd.icon_definitions import md_icons
+from kivy.setupconfig import USE_SDL2
 
 
 
 
-#from android.permissions import request_permissions, Permission
-#request_permissions([Permission.WRITE_EXTERNAL_STORAGE])
-#request_permissions([Permission.READ_EXTERNAL_STORAGE])
+
+from android.permissions import request_permissions, Permission
+request_permissions([Permission.WRITE_EXTERNAL_STORAGE])
+request_permissions([Permission.READ_EXTERNAL_STORAGE])
 
 __version__ = "1.0.3"
 
-#Config.set('graphics', 'resizable', '0') #0 being off 1 being on as in true/false
-#Config.set('graphics', 'height', '2400')
-#Config.set('graphics', 'width', '1080')
+Config.set('graphics', 'resizable', '1') #0 being off 1 being on as in true/false
+Config.set('graphics', 'height', '2400')
+Config.set('graphics', 'width', '540')
+
 
 
 colors = {
@@ -352,25 +356,42 @@ colors = {
 
 #define our different Screens
 class MainMenu(MDScreen):
+    global optCutGlobal
+    global recursive_cntGlobal
+    global cutGlobal
+
+    settings= load_settings()
+    optCutGlobal=settings[0]
+    recursive_cntGlobal=settings[6]
+    cutGlobal=0
+   
     pass
+
 
 
 #Options for Encoding
 class EncodeStegoOptions(MDScreen):
+    global optCutGlobal
+    optCutGlobal=False
+
     def checkbox_click(self, instance, value):
         global optCutGlobal
-        optCutGlobal=False
         if value is True:
             print("Checkbox Checked")
-            optCutGlobal=value
+            optCutGlobal=True
+            #
         else:
             print("Checkbox Unchecked")
-            optCutGlobal=value
+            optCutGlobal=False
+            #set_settings(optcut_=optCutGlobal)
+        
+
     def pushRecursiveCounter(self):
         global recursive_cntGlobal 
         recursive_cntGlobal=int(self.recursiveCounter.value)
+        set_settings(recursive_count_=recursive_cntGlobal,optcut_=optCutGlobal)
         print("Recursive Counter: ", recursive_cntGlobal)
-
+        print("Optcut: ", optCutGlobal)
 #Verschlüsseln
 class EncodeStego(MDScreen):
 
@@ -382,8 +403,7 @@ class EncodeStego(MDScreen):
 
         print("Message: ", secretText)
 
-class ShowCut(MDScreen):
-    pass
+
 
 
 #Entschlüsseln
@@ -393,7 +413,10 @@ class DecodeStego(MDScreen):
 
     def pushCut(self):
         global cutGlobal
+        
         cutGlobal=self.cut.text
+        if cutGlobal=="":
+            cutGlobal="0.0"
         cutGlobal= float(cutGlobal)
         print("Cut:",cutGlobal)
 
@@ -421,6 +444,8 @@ class LoadDialog(MDScreen):
                 screen = self.manager.get_screen('showmessage')
                 screen.ids['message_output'].text = message
 
+
+
 #Create and Save Encoded File
 class SaveDialog(MDScreen):
     save = ObjectProperty(None)
@@ -430,16 +455,60 @@ class SaveDialog(MDScreen):
     def save(self, path, filename):
         #global cutStego///////////////////////////
         with open(os.path.join(path, filename[0]))as stream:
+            global filenameglobal
+
             
             print("Path:",path)
             print("Filename:",filename[0])
             print("Text:",secretText)
             print("Optcut enabled?:",optCutGlobal)
             print("Recursive Counter:",recursive_cntGlobal)
-            cut=steg_encode_simple(filename[0],secretText,optCutGlobal,recursive_cntGlobal)
+            filenameglobal=filename[0]
+
+            cut=steg_encode_simple(filename[0],secretText)
             print("Cut:",cut)
             screen = self.manager.get_screen('showcut')
             screen.ids['calculatedCut'].text = str(cut)
+            print("FILENAMEGLOBAL",stego_path_generator(filenameglobal,ImageType(0)))
+
+class ShowCut(MDScreen):
+    
+    def share(self):
+        global filenameglobal
+        
+        from android.storage import primary_external_storage_path
+        
+        from jnius import autoclass
+        from jnius import cast
+        
+
+        
+        path= stego_path_generator(filenameglobal,ImageType(0))
+        print ("PATH",path)
+
+        StrictMode = autoclass('android.os.StrictMode')
+        StrictMode.disableDeathOnFileUriExposure()
+        
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        
+        Intent = autoclass('android.content.Intent')
+        String = autoclass('java.lang.String')
+        Uri = autoclass('android.net.Uri')
+        File = autoclass('java.io.File')
+
+        shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.setType('"application/pdf"')
+
+        #path = os.path.join(primary_external_storage_path(),"test.pdf")
+
+        imageFile = File(path)
+        uri = Uri.fromFile(imageFile)
+        parcelable = cast('android.os.Parcelable', uri)
+        shareIntent.putExtra(Intent.EXTRA_STREAM, parcelable)
+
+        currentActivity = cast('android.app.Activity', PythonActivity.mActivity)
+        currentActivity.startActivity(shareIntent)
+
 
 class ShowSecretMessage(MDScreen):
     pass
@@ -465,11 +534,13 @@ class AwesomeApp(MDApp):
 
     def build(self):
 
+        
         self.theme_cls.colors = colors
         self.theme_cls.primary_palette = "Gray"
         self.theme_cls.primary_hue = "600"  # "500"
         self.theme_cls.accent_palette = "Purple"
         self.theme_cls.theme_style = "Dark"  # "Light"
+        
     
         return WindowManager()
 

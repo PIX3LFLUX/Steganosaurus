@@ -26,38 +26,37 @@
         padding: 10
         spacing: 30
 
-        MDLabel:
-            markup: True
-            text: "[b]Steganography App[/b]"
-            halign: "center"
-            font_size:45
-            pos_hint: { 'x':0, 'y':.4}
+        Image:
+            source:"icons/stegosaurus.png"
+            font_size: root.height/10
+            pos_hint: {'x':0, 'y':.35}
      
-        MDFillRoundFlatButton:   
-            markup: True
-            text: "[b]Encode\nStego Image[/b]"
-            #halign: "center"
-            font_size: 30
-            pos_hint: { 'x':0.15, 'y':.45}
+        MDFillRoundFlatButton:
+            font_size: root.height/25
             size_hint:(.7,.2)
+            pos_hint: { 'x':0.15, 'y':.4}
             on_release: 
                 app.root.current = "encode"
                 root.manager.transition.direction = "left"
 
+            Image:
+                source:"icons/ImagetoKey.png"
+
         MDFillRoundFlatButton:
-            markup: True
-            text: "[b]Decode\nStego Image[/b]" 
-            font_size: 30
+            font_size: root.height/25
             size_hint:(.7,.2)
-            pos_hint: { 'x':0.15, 'y':.2}
+            pos_hint: { 'x':0.15, 'y':.15}
 
             on_release: 
                 app.root.current = "decode"
                 root.manager.transition.direction = "left"
 
+            Image:
+                source:"icons/KeytoImage.png"
+
         Label:
             text: "By Deniz Braun\nand Maximilian Ketschik"
-            font_size: 24
+            font_size:  root.height/50
             pos_hint: { 'x':0, 'y':-.45}
             valign: "top"
             halign: "center"
@@ -74,28 +73,31 @@
 
     FloatLayout:
 
-        MDFillRoundFlatButton:
+        MDIconButton: 
+      
+            icon:"keyboard-backspace"                          
+            pos_hint: { 'x':.1, 'y':.9}
             
-            markup: True
-            text: "[b]Back[/b]"
-            font_size: 30
-            pos_hint: { 'x':.1, 'y':.85}
-            size_hint:(.35,.1)
-            on_release: 
+            user_font_size: "45" 
+        
+            md_bg_color:[0.5,0.5,0.5,.15]  
+
+            on_release:   
                 app.root.current = "main"
                 root.manager.transition.direction = "right"
         
-        MDFillRoundFlatButton:
-            
-            markup: True
-            text: "[b]Options[/b]"
-            font_size: 30
-            pos_hint: { 'x':0.55, 'y':.85} 
-            size_hint:(.35,.1)
+        MDIconButton: 
+      
+            icon:"cog"                          
+            pos_hint: { 'x':.75, 'y':.9} 
+            user_font_size: "45" 
+            md_bg_color:[0.5,0.5,0.5,.15]  
 
             on_release: 
                 app.root.current = "encodeoptions"
-                root.manager.transition.direction = "left"        
+                root.manager.transition.direction = "left"
+        
+           
 
         MDTextField:
             id: message
@@ -105,16 +107,19 @@
             mode: "fill"
             multiline:True
 
-        MDFillRoundFlatButton:
-            markup: True
-            text: "[b]Choose\nStego Image[/b]"
+        MDFillRoundFlatButton: 
+            #markup: True
+            #text: "[b]Choose\nStego Image[/b]"
             pos_hint: { 'x':0.15, 'y':.1} 
             size_hint:(.7,.1)
-            font_size: 30
+            font_size: root.height/25
             on_release: 
                 app.root.current = "savedialog"
                 root.manager.transition.direction = "left"
                 root.pushMessage()
+            Image:
+                source:"icons/Dataexp.png"
+
 <EncodeStegoOptions>:
     name:"encodeoptions"
     recursiveCounter:recursiveCounter
@@ -125,13 +130,14 @@
         padding: 50
         spacing: 30
 
-        MDFillRoundFlatButton:
-                
-            markup: True
-            text: "[b]Back[/b]"
-            font_size: 30
-            pos_hint: { 'x':.1, 'y':.85}
-            size_hint:(.35,.1)
+        MDIconButton: 
+      
+            icon:"keyboard-backspace"                          
+            pos_hint: { 'x':.1, 'y':.9}
+            user_font_size: "40" 
+        
+            md_bg_color:[0.5,0.5,0.5,.15]  
+
             on_release: 
                 app.root.current = "encode"
                 root.manager.transition.direction = "right"
@@ -177,14 +183,13 @@
         padding: 50
         spacing: 20
 
-       
-
-        MDFillRoundFlatButton: 
-            markup: True
-            text: "[b]Back[/b]"
-            font_size: 30
-            pos_hint: { 'x':.1, 'y':.85}
-            size_hint:(.35,.1)
+        MDIconButton: 
+      
+            icon:"keyboard-backspace"                          
+            pos_hint: { 'x':.1, 'y':.9}
+            user_font_size: "40" 
+        
+            md_bg_color:[0.5,0.5,0.5,.15]  
             on_release: 
                 app.root.current = "main"
                 root.manager.transition.direction = "right"
@@ -201,12 +206,14 @@
             markup: True
             pos_hint: { 'x':0.15, 'y':.1} 
             size_hint:(.7,.1)
-            font_size: 30
-            text: "[b]Load\nStego Image[/b]"
+            #font_size: root.height/25
+            #text: "[b]Load\nStego Image[/b]"
             on_release: 
                 app.root.current = "loaddialog"
                 root.manager.transition.direction = "left"
                 root.pushCut()
+            Image:
+                source:"icons/Dataexp.png"
 
 <ShowCut>:
     name:"showcut"
@@ -216,13 +223,25 @@
         spacing: 20
         orientation:"vertical"
 
-        MDFillRoundFlatButton:
-            text:"Back"
-            pos_hint: { 'x':.1, 'y':.85}
-            size_hint:(.35,.1)
+        MDIconButton: 
+      
+            icon:"keyboard-backspace"                          
+            pos_hint: { 'x':.1, 'y':.9}
+            user_font_size: "40" 
+        
+            md_bg_color:[0.5,0.5,0.5,.15]  
             on_release: 
                 app.root.current = "main"
                 root.manager.transition.direction = "left"
+
+        MDIconButton: 
+      
+            icon:"share-variant-outline"                          
+            pos_hint: { 'x':.75, 'y':.9} 
+            user_font_size: "40" 
+        
+            md_bg_color:[0.5,0.5,0.5,.15]  
+            on_release: root.share()
         Label:
             text:"Your secret Key:"
             pos_hint: { 'x':.05, 'y':0.5} 
@@ -238,7 +257,7 @@
             text:"Copy to clipboard"
             pos_hint: { 'x':0.15, 'y':.1} 
             size_hint:(.7,.1)
-            font_size: 30
+            font_size: root.height/25
             on_release:
                 self.text = "Copied!"
                 Clipboard.copy(calculatedCut.text)
@@ -256,24 +275,29 @@
 
 
         MDFillRoundFlatButton: 
-            text: "Cancel"
+            #text: "Cancel"
             pos_hint: { 'x':0, 'y':0}
-            size_hint:(.49,.1)
-            font_size: 20
+            size_hint:(.49,.05)
+            #font_size: root.height/25
             on_release: 
                 app.root.current = "decode"
-                root.manager.transition.direction = "right" 
+                root.manager.transition.direction = "right"
+            Image:
+                source:"icons/cancel.png"
+            
         MDFillRoundFlatButton:  
-            text: "Load"
+            #text: "Load"
             pos_hint: { 'x':.51, 'y':0}
-            size_hint:(.49,.1)
-            font_size: 20
+            size_hint:(.49,.05)
+            #font_size: root.height/25
             
             #size_hint:(1,1.1)
             on_release: 
                 root.load(filechooser.path, filechooser.selection)
                 app.root.current = "showmessage" 
                 root.manager.transition.direction = "left"
+            Image:
+                source:"icons/check.png"
 
 
 <SaveDialog>:
@@ -292,24 +316,28 @@
             #size_hint_y: None
             height: 30
         MDFillRoundFlatButton:
-            text: "Cancel"
+            #text: "Cancel"
             pos_hint: { 'x':0, 'y':0}
-            size_hint:(.49,.1)
-            font_size: 20
+            size_hint:(.49,.05)
+            #font_size: root.height/25
             on_release: 
                 app.root.current = "encode"
                 root.manager.transition.direction = "right"
+            Image:
+                source:"icons/cancel.png"
 
         MDFillRoundFlatButton:
-            text: "Load and hide"
+            #text: "Load and hide"
             pos_hint: { 'x':.51, 'y':0}
-            size_hint:(.49,.1)
-            font_size: 20
+            size_hint:(.49,.05)
+            #font_size: root.height/25
             on_release:
                 text:"encoding"
                 root.save(filechooser.path, filechooser.selection)
                 app.root.current = "showcut"
                 root.manager.transition.direction = "right"
+            Image:
+                source:"icons/check.png"
 
 <ShowSecretMessage>:
     name:"showmessage"
@@ -320,11 +348,14 @@
         pos: root.pos
         orientation:"vertical"
 
-        MDFillRoundFlatButton:
-            text:"Back"
-            font_size: 30
-            pos_hint: { 'x':.1, 'y':.85}
-            size_hint:(.35,.1)
+        MDIconButton: 
+      
+            icon:"keyboard-backspace"                          
+            pos_hint: { 'x':.1, 'y':.9}
+            user_font_size: "40" 
+        
+            md_bg_color:[0.5,0.5,0.5,.15]  
+
             on_release: 
                 app.root.current = "main"
                 root.manager.transition.direction = "right"
@@ -345,7 +376,7 @@
             text:"Copy to clipboard"
             pos_hint: { 'x':0.15, 'y':.1} 
             size_hint:(.7,.1)
-            font_size: 30
+            font_size: root.height/25
             on_release:
                 self.text = "Copied!"
                 Clipboard.copy(message_output.text)
