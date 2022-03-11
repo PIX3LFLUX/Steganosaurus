@@ -345,7 +345,7 @@ To measure the differences between the cover and stego image, we choose two "gen
 
 <!-- ![image41](ImageSources/documentation/resize_test.png) -->
 <figure>
-<img src="ImageSources/documentation/resize_test.png" width="1000" height="600">
+<img src="ImageSources/documentation/resize_test.png" width="800" height="500">
 <figcaption>Image size test on <i>mandril_color.tif</i> .Constant gain, constant cut.</figcaption>
 </figure>
 The test shows a steep decrease in MSE and increase in SSIM as the cover image size goes up. The results show an exponential correlation between image size and time to process. The results are as expected.
@@ -358,7 +358,7 @@ The test shows a steep decrease in MSE and increase in SSIM as the cover image s
 
 <!-- ![image42](ImageSources/documentation/lena_payload.png) -->
 <figure>
-<img src="ImageSources/documentation/lena_payload.png" width="1000" height="600">
+<img src="ImageSources/documentation/lena_payload.png" width="800" height="500">
 <figcaption>Payload test on <i>lena_color_512.tif</i>. Optimized gain, optimized cut.</figcaption>
 </figure>
 As the payload increases, the mask size also increases. Therefore the time to process will be higher. And more information is stored, the stronger is the impact on the cover image, which can be derived from the sinking SSIM and PSNR. Results are as expected.
@@ -371,7 +371,7 @@ As the payload increases, the mask size also increases. Therefore the time to pr
 
 <!-- ![image43](ImageSources/documentation/Diagram_gainOptimizer.png) -->
 <figure>
-<img src="ImageSources/documentation/Diagram_gainOptimizer.png" width="1000" height="600">
+<img src="ImageSources/documentation/Diagram_gainOptimizer.png" width="800" height="500">
 <figcaption>Gain optimization test on <i>lena_color_256.tif</i>. Constant payload, constant cut.</figcaption>
 </figure>
 When optimizing the gain, the first iterations contribute the most to cover image integrity. After the 5. iteration, the improvements are negligable as the SSIM and MSE converge.
@@ -384,7 +384,7 @@ When optimizing the gain, the first iterations contribute the most to cover imag
 
 <!-- ![image44](ImageSources/documentation/cut_test.png) -->
 <figure>
-<img src="ImageSources/documentation/cut_test.png" width="1000" height="600">
+<img src="ImageSources/documentation/cut_test.png" width="800" height="500">
 <figcaption>Cut test on <i>mandril_color.tif</i>. Constant payload, constant gain.</figcaption>
 </figure>
 This test did not work as expected. By increasing the cut and therefore the mask size, more information is embedded into the lower frequencies, which contribute more to the image as their amplitude is not only higher, but they are also much more noticeable to the human eye. (This trait is often used in image compression). Nevertheless, the test showed positive results towards increase in mask size, but rapidly changes momentum as full image size is reached. This test perfectly shows the difference between the capabilities of some measurement instruments in image processing and how important it is to include multiple measurement approaches (like SSIM, although it also did not perform so well). Even though SSIM is supposed to mimic how humans perceive images, it still failed at evaluating the more noticeable difference in lower frequencies.
@@ -528,7 +528,7 @@ Distributed under the GNU License. See `LICENSE.txt` for more information.
 # Contact
 
 Maximilian Ketschik -  kema1039@h-ka.de  
-Deniz Braun    -  brde1011@h-ka.de
+Deniz Braun    -  brde1020@h-ka.de
 
 Project Link: [https://github.com/github_username/repo_name](https://github.com/PIX3LFLUX/Steganosaurus)
 
