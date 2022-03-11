@@ -12,23 +12,23 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/PIX3LFLUX/Steganosaurus">
+    <img src="Stego/icons/stegosaurus.png" alt="Logo" width="600" height="300">
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">Steganosaurus</h3>
 
   <p align="center">
-    project_description
+    Fourier-Transform Image Steganography App
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/PIX3LFLUX/Steganosaurus"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://github.com/PIX3LFLUX/Steganosaurus">View Demo</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
+    <a href="https://github.com/PIX3LFLUX/Steganosaurus/issues">Report Bug</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
+    <a href="https://github.com/PIX3LFLUX/Steganosaurus/issues">Request Feature</a>
   </p>
 </div>
 
@@ -530,7 +530,7 @@ Distributed under the GNU License. See `LICENSE.txt` for more information.
 Maximilian Ketschik -  kema1039@h-ka.de  
 Deniz Braun    -  brde1020@h-ka.de
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/PIX3LFLUX/Steganosaurus)
+Project Link: [https://github.com/PIX3LFLUX/Steganosaurus](https://github.com/PIX3LFLUX/Steganosaurus)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
