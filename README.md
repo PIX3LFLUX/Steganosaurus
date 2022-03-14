@@ -93,7 +93,7 @@ For ease of use and general usability, we decided to pack this program into a py
 ## What is the (fast) Fourier transform?
 The discrete Fourier transform (short: DFT) converts the image from the spatial domain to the frequency domain. It is discrete, because the input (in this case pixels) is quantized and limited. The frequency domain easily reveals frequential properties of the image, which is often used in image file compression. You can imagine the frequency domain with the DFT as another way of depicting the image, with the DFT as its function.  
 However, you need to keep in mind that the resulting image is ***complex*** in the frequency domain, which means that after calculating the absolute and angle, you are left with **two planes**. The angle plane, also called the *phase*, has information about the relative location of the frequencies, whereas the absolute plane has information about their magnitude, also called *magnitude spectrum*.  When hiding information inside these planes, it is recommended to use the magnitude spectrum, since we mostly want to keep the image and its original proportions intact. Which is why we only used the magnitude spectrum.
-The DFT as an algorithm can be broken down into smaller DFTs and their counterparts, which makes the then so called fast Fourier transform (FFT) an n*O(log(n)) algorithm.
+The DFT as an algorithm can be broken down into smaller DFTs and their counterparts, which makes the then so called fast Fourier transform (FFT) an n*O(log(n)) algorithm, which is much faster.
 
 ![image999](/ImageSources/documentation/fft_cover_shift.png)
 
@@ -110,7 +110,7 @@ Therefore we used a digital approach, where we would embed the information in a 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## What makes the digital approach so great?
-The benefit over 'conventional' LSB embedding is that the hidden information is much harder for the human eye to see and arguably for computer programs as well, since it was hidden in the frequency domain, which corresponds to subtle changes of color in high frequency parts of the stego image. It is also spread across the whole image, which makes it even harder to detect with the naked eye. Compared to the 'analog' approach, the payload can be much higher without any noticeable disturbance of the carrier image. Theoretically, it also allows for **any digital file** to be hidden inside the image.
+The benefit over 'conventional' LSB embedding is that the hidden information is much harder for the human eye to see and arguably for computer programs as well, since it was hidden in the frequency domain, which corresponds to subtle changes of color in high frequency parts of the stego image. It is also spread across the whole image, which makes it even harder to detect with the naked eye. Compared to the 'analog' approach, the payload can be much higher without any noticeable disturbance of the carrier image. Theoretically, it also allows for **any digital file** to be "hidable" inside the image.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -204,13 +204,13 @@ The now binary message simply replaces the current values of the FFT, in range o
 
 ***7. Reverse the FFT and stitch the split image back together***  
 Calculating the inverse Fourier transform means mirroring the upper part of the FFT to the lower part, by which also the previously applied gain is halved.  
-> **FFT of green channel with default cut and gain of 10000**  
+> **Absolute FFT of green channel with default cut and gain of 10000**  
 > ![image14](/ImageSources/documentation/green_fft_embed_ifft0.png)  
+> **FFT of green channel with default cut and gain of 10000 as height plot**  
+> ![image15](/ImageSources/documentation/green_fft_embed_ifft_height0.png)  
 
 <br>
 
-> **FFT of green channel with default cut and gain of 10000 as height plot**  
-> ![image15](/ImageSources/documentation/green_fft_embed_ifft_height0.png)  
 
 <br>
 
@@ -218,6 +218,12 @@ Calculating the inverse Fourier transform means mirroring the upper part of the 
 > **Stego image (left) and original image (right)**  
 > ![image16](/ImageSources/documentation/stego_RGB.png)
 > ![image17](/ImageSources/documentation/lena_color_256.png)
+
+> **Channel histograms RGB. Channels stacked vertically.**  
+> ![image](/ImageSources/documentation/histograms0.png)
+> **Channel histograms YCbCr. Channels stacked vertically.**  
+> ![image](/ImageSources/documentation/histograms1.png)
+> Notice how a narrower histogram and using less channels increases the absolute difference between the unmodified cover image and the modified stego image.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 <br>
@@ -516,7 +522,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 # License
 
-Distributed under the GNU License. See `LICENSE.txt` for more information.
+Distributed under the GNU License. See [LICENSE][license-url] for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -545,6 +551,6 @@ Project Link: [https://github.com/PIX3LFLUX/Steganosaurus](https://github.com/PI
 [issues-shield]: https://img.shields.io/github/issues/PIX3LFLUX/Steganosaurus.svg?style=for-the-badge
 [issues-url]: https://github.com/PIX3LFLUX/Steganosaurus/issues
 [license-shield]: https://img.shields.io/github/license/PIX3LFLUX/Steganosaurus.svg?style=for-the-badge
-[license-url]: https://github.com/PIX3LFLUX/Steganosaurus/blob/master/LICENSE.txt
+[license-url]: https://github.com/PIX3LFLUX/Steganosaurus/blob/master/LICENSE
 [product-screenshot]: images/screenshot.png
 [release-url]: https://github.com/PIX3LFLUX/Steganosaurus/release
