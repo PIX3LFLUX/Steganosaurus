@@ -36,9 +36,9 @@ def stego_path_generator(cover_img_path: str, img_type: ImageType):
     name = full_name.rsplit(".", maxsplit=1)[0]
     steg_name = name + "_steg." + img_type.name
     cwdname = os.getcwd()
-    if not os.path.exists(cwdname + "\\Steganograms"):
-        os.mkdir(os.path.join(cwdname, "Steganograms"))
-    filedir = os.path.join(cwdname, "Steganograms")
+    if not os.path.exists(cwdname + "\\ImageSources\\Steganograms"):
+        os.mkdir(os.path.join(cwdname, "ImageSources\\Steganograms"))
+    filedir = os.path.join(cwdname, "ImageSources\\Steganograms")
     return os.path.join(filedir, steg_name)
 
 # same as the above, but append _crop to the image name
